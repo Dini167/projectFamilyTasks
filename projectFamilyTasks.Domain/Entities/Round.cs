@@ -9,4 +9,5 @@ public class Round : BaseEntity
     public DateTime? EndDate { get; set; }
     public RoundStatus Status { get; set; }
     public int TasksQuotaPerChild { get; set; }
+    public List<Assignment> Assignments { get; set; } = new();
 }
