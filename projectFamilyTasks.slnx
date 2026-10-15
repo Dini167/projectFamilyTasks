@@ -1,3 +1,6 @@
 <Solution>
   <Project Path="projectFamilyTasks.Api/projectFamilyTasks.Api.csproj" />
+  <Project Path="projectFamilyTasks.Application/projectFamilyTasks.Application.csproj" />
+  <Project Path="projectFamilyTasks.Domain/projectFamilyTasks.Domain.csproj" />
+  <Project Path="projectFamilyTasks.Infrastructure/projectFamilyTasks.Infrastructure.csproj" />
 </Solution>
