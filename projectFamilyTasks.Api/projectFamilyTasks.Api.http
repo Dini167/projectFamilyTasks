@@ -1,0 +1,6 @@
+@projectFamilyTasks.Api_HostAddress = http://localhost:5231
+
+GET {{projectFamilyTasks.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
