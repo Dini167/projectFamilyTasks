@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using projectFamilyTasks.Application.Interfaces.Repositories;
 using projectFamilyTasks.Infrastructure.Persistence;
 using projectFamilyTasks.Infrastructure.Persistence.Repositories;
+using projectFamilyTasks.Infrastructure.Settings;
 
 namespace projectFamilyTasks.Infrastructure;
 
@@ -14,6 +15,8 @@ public static class DependencyInjection
     {
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("Default")));
+
+        services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
