@@ -1,4 +1,5 @@
 using projectFamilyTasks.Application.DTOs;
+using projectFamilyTasks.Application.DTOs.HouseTasks;
 using projectFamilyTasks.Domain.Entities;
 
 namespace projectFamilyTasks.Application.Interfaces.Repositories;

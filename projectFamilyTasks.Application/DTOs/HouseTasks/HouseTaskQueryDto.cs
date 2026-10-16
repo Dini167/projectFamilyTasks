@@ -1,6 +1,6 @@
 using projectFamilyTasks.Domain.Enums;
 
-namespace projectFamilyTasks.Application.DTOs;
+namespace projectFamilyTasks.Application.DTOs.HouseTasks;
 
 public class HouseTaskQueryDto : PagedQueryDto
 {

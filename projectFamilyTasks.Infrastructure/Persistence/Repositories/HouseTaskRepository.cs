@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using projectFamilyTasks.Application.DTOs;
+using projectFamilyTasks.Application.DTOs.HouseTasks;
 using projectFamilyTasks.Application.Interfaces.Repositories;
 using projectFamilyTasks.Domain.Entities;
 
