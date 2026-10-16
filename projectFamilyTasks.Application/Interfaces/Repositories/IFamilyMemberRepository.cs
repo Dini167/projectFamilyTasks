@@ -7,5 +7,5 @@ public interface IFamilyMemberRepository : IGenericRepository<FamilyMember>
 {
     Task<FamilyMember?> GetByUserNameAsync(string userName, CancellationToken ct);
 
-    Task<PagedResultDto<Child>> GetChildrenPagedAsync(int page, int pageSize, CancellationToken ct);
+    Task<PagedResultDto<Child>> GetChildrenPagedAsync(PagedQueryDto query, CancellationToken ct);
 }

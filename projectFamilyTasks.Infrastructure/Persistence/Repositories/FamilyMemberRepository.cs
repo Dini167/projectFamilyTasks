@@ -19,12 +19,12 @@ public class FamilyMemberRepository : GenericRepository<FamilyMember>, IFamilyMe
     }
 
     public async Task<PagedResultDto<Child>> GetChildrenPagedAsync(
-        int page, int pageSize, CancellationToken ct)
+        PagedQueryDto query, CancellationToken ct)
     {
         return await Context.Children
             .AsNoTracking()
             .OrderBy(c => c.Name)
             .ThenBy(c => c.Id)
-            .ToPagedResultAsync(page, pageSize, ct);
+            .ToPagedResultAsync(query.Page, query.PageSize, ct);
     }
 }
