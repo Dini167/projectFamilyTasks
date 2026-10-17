@@ -26,12 +26,20 @@ public class ExceptionHandlingMiddleware
         }
         catch (AppException ex)
         {
-            _logger.LogInformation("Handled error {StatusCode}: {Message}", ex.StatusCode, ex.Message);
+            using (_logger.BeginCorrelationScope(context.GetCorrelationId()))
+            {
+                _logger.LogInformation("Handled error {StatusCode}: {Message}", ex.StatusCode, ex.Message);
+            }
+
             await WriteErrorAsync(context, ex.StatusCode, ex.Message);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unhandled exception");
+            using (_logger.BeginCorrelationScope(context.GetCorrelationId()))
+            {
+                _logger.LogError(ex, "Unhandled exception");
+            }
+
             await WriteErrorAsync(context, StatusCodes.Status500InternalServerError,
                 "אירעה שגיאה בלתי צפויה. יש לנסות שוב מאוחר יותר.");
         }
@@ -43,7 +51,7 @@ public class ExceptionHandlingMiddleware
         {
             Status = statusCode,
             Message = message,
-            CorrelationId = context.Items[HttpContextKeys.CorrelationId]?.ToString() ?? context.TraceIdentifier
+            CorrelationId = context.GetCorrelationId()
         };
 
         context.Response.StatusCode = statusCode;
