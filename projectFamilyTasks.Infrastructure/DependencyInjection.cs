@@ -20,6 +20,8 @@ public static class DependencyInjection
 
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
 
+        services.Configure<SeedSettings>(configuration.GetSection(SeedSettings.SectionName));
+
         services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
 
         services.AddSingleton<ITokenService, JwtTokenService>();
