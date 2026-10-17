@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 namespace projectFamilyTasks.Api.Middleware;
@@ -17,14 +18,32 @@ public class CorrelationIdMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        var startedAt = Stopwatch.GetTimestamp();
         var correlationId = ReadOrCreateId(context);
 
         context.Items[HttpContextKeys.CorrelationId] = correlationId;
         context.Response.Headers[HttpContextKeys.CorrelationIdHeader] = correlationId;
 
+        context.Response.OnCompleted(() =>
+        {
+            LogRequest(context, correlationId, startedAt);
+            return Task.CompletedTask;
+        });
+
         using (_logger.BeginCorrelationScope(correlationId))
         {
             await _next(context);
+        }
+    }
+
+    private void LogRequest(HttpContext context, string correlationId, long startedAt)
+    {
+        var elapsedMs = Stopwatch.GetElapsedTime(startedAt).TotalMilliseconds;
+
+        using (_logger.BeginCorrelationScope(correlationId))
+        {
+            _logger.LogInformation("HTTP {Method} {Path} responded {StatusCode} in {ElapsedMs:0} ms",
+                context.Request.Method, context.Request.Path.Value, context.Response.StatusCode, elapsedMs);
         }
     }
 
