@@ -92,4 +92,25 @@ public class AssignmentServiceTests
         Assert.Equal(99, assignment.ChildId);
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
+
+    [Fact]
+    public async Task TakeAsync_ChildReachedQuota_ThrowsBadRequestAndDoesNotSave()
+    {
+        // Arrange: מכסה של 2, והילדה כבר תפסה 2 (alreadyTaken), והשיבוץ החדש פנוי ומתאים לגילה.
+        var round = OpenRound(quota: 2);
+        var child = ChildOf(id: 5, age: 9);
+        var assignment = FreeAssignment(id: 10, roundId: round.Id, minAge: 8);
+        GivenChildTakes(round, child, assignment, alreadyTaken: 2);
+
+        // Act: הניסיון לתפוס משימה שלישית, שאמור להיכשל.
+        var error = await Assert.ThrowsAsync<BadRequestException>(
+            () => _service.TakeAsync(assignment.Id, CancellationToken.None));
+
+        // Assert: קוד 400 עם הודעת המכסה בעברית, השיבוץ נשאר פנוי, ושום דבר לא נשמר.
+        Assert.Equal(400, error.StatusCode);
+        Assert.Equal(ErrorMessages.QuotaReached, error.Message);
+        Assert.Null(assignment.ChildId);
+        Assert.Null(assignment.AssignedAt);
+        _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
 }
