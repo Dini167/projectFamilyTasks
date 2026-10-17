@@ -1,5 +1,7 @@
 using AutoMapper;
 using Moq;
+using projectFamilyTasks.Application.Common.Constants;
+using projectFamilyTasks.Application.Exceptions;
 using projectFamilyTasks.Application.Interfaces.Repositories;
 using projectFamilyTasks.Application.Interfaces.Services;
 using projectFamilyTasks.Application.Services;
@@ -68,5 +70,26 @@ public class AssignmentServiceTests
         Assert.Equal(child.Id, assignment.ChildId);
         Assert.NotNull(assignment.AssignedAt);
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task TakeAsync_AssignmentAlreadyTaken_ThrowsConflictAndDoesNotSave()
+    {
+        // Arrange: המשימה כבר שייכת לילד אחר (מספר 99), והילדה (מספר 5) מנסה לתפוס אותה.
+        var round = OpenRound();
+        var child = ChildOf(id: 5, age: 9);
+        var assignment = FreeAssignment(id: 10, roundId: round.Id, minAge: 8);
+        assignment.ChildId = 99;
+        GivenChildTakes(round, child, assignment, alreadyTaken: 0);
+
+        // Act: הניסיון לתפוס, שאמור להיכשל.
+        var error = await Assert.ThrowsAsync<ConflictException>(
+            () => _service.TakeAsync(assignment.Id, CancellationToken.None));
+
+        // Assert: קוד 409 עם ההודעה הנכונה בעברית, השיבוץ לא השתנה, ושום דבר לא נשמר.
+        Assert.Equal(409, error.StatusCode);
+        Assert.Equal(ErrorMessages.AssignmentTaken, error.Message);
+        Assert.Equal(99, assignment.ChildId);
+        _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 }
