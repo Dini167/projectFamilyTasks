@@ -57,6 +57,10 @@ namespace projectFamilyTasks.Infrastructure.Persistence.Migrations
                     b.Property<int>("RoundId")
                         .HasColumnType("integer");
 
+                    b.Property<Guid>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ChildId");
@@ -295,6 +299,10 @@ namespace projectFamilyTasks.Infrastructure.Persistence.Migrations
 
                     b.Property<int>("PointsBalance")
                         .HasColumnType("integer");
+
+                    b.Property<Guid>("Version")
+                        .IsConcurrencyToken()
+                        .HasColumnType("uuid");
 
                     b.HasDiscriminator().HasValue("Child");
                 });
