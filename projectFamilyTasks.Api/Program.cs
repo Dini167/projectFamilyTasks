@@ -1,4 +1,5 @@
 using projectFamilyTasks.Api.Extensions;
+using projectFamilyTasks.Api.Middleware;
 using projectFamilyTasks.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,8 @@ builder.Services.AddControllers();
 builder.Services.AddSwaggerWithJwt();
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
