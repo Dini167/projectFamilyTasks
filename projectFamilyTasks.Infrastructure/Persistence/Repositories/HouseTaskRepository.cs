@@ -36,4 +36,19 @@ public class HouseTaskRepository : GenericRepository<HouseTask>, IHouseTaskRepos
             _ => tasks.OrderByDirection(t => t.Description, query.Descending)
         };
     }
+
+    public async Task<HouseTask?> GetForUpdateAsync(int id, CancellationToken ct)
+    {
+        return await Context.HouseTasks.Include(t => t.Categories).FirstOrDefaultAsync(t => t.Id == id, ct);
+    }
+
+    public async Task<HouseTask?> GetByIdWithCategoriesAsync(int id, CancellationToken ct)
+    {
+        return await Context.HouseTasks.AsNoTracking().Include(t => t.Categories).FirstOrDefaultAsync(t => t.Id == id, ct);
+    }
+
+    public async Task<List<int>> GetAllIdsAsync(CancellationToken ct)
+    {
+        return await Context.HouseTasks.AsNoTracking().Select(t => t.Id).ToListAsync(ct);
+    }
 }

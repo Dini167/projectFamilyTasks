@@ -14,5 +14,7 @@ public class MemberProfile : Profile
         CreateMap<RegisterChildRequestDto, Child>();
 
         CreateMap<UpdateChildRequestDto, Child>();
+
+        CreateMap<RegisterParentRequestDto, Parent>();
     }
 }

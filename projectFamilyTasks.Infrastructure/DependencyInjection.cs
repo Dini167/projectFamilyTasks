@@ -32,6 +32,9 @@ public static class DependencyInjection
         services.AddScoped<IAssignmentRepository, AssignmentRepository>();
         services.AddScoped<ISwapRequestRepository, SwapRequestRepository>();
         services.AddScoped<IChatMessageRepository, ChatMessageRepository>();
+        services.AddScoped<IParentAccessRepository, ParentAccessRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<ITaskCompletionRepository, TaskCompletionRepository>();
 
         return services;
     }

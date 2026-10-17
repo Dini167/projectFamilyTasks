@@ -27,4 +27,19 @@ public class FamilyMemberRepository : GenericRepository<FamilyMember>, IFamilyMe
             .ThenBy(c => c.Id)
             .ToPagedResultAsync(query.Page, query.PageSize, ct);
     }
+
+    public async Task<Child?> GetChildAsync(int id, CancellationToken ct)
+    {
+        return await Context.Children.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id, ct);
+    }
+
+    public async Task<Child?> GetChildForUpdateAsync(int id, CancellationToken ct)
+    {
+        return await Context.Children.FirstOrDefaultAsync(c => c.Id == id, ct);
+    }
+
+    public async Task<IReadOnlyList<Child>> GetApprovedChildrenAsync(CancellationToken ct)
+    {
+        return await Context.Children.AsNoTracking().Where(c => c.IsApproved).OrderBy(c => c.Name).ToListAsync(ct);
+    }
 }

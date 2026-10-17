@@ -51,4 +51,9 @@ public class AssignmentRepository : GenericRepository<Assignment>, IAssignmentRe
             .ThenBy(a => a.Id)
             .ToPagedResultAsync(query.Page, query.PageSize, ct);
     }
+
+    public async Task<bool> AnyForTaskAsync(int houseTaskId, CancellationToken ct)
+    {
+        return await Context.Assignments.AnyAsync(a => a.HouseTaskId == houseTaskId, ct);
+    }
 }

@@ -35,4 +35,9 @@ public class RoundRepository : GenericRepository<Round>, IRoundRepository
             .OrderByDescending(r => r.StartDate)
             .ToPagedResultAsync(query.Page, query.PageSize, ct);
     }
+
+    public async Task<Round?> GetForUpdateAsync(int id, CancellationToken ct)
+    {
+        return await Context.Rounds.FirstOrDefaultAsync(r => r.Id == id, ct);
+    }
 }

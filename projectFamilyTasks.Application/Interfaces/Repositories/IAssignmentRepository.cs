@@ -14,4 +14,6 @@ public interface IAssignmentRepository : IGenericRepository<Assignment>
     Task<int> CountByChildAsync(int roundId, int childId, CancellationToken ct);
 
     Task<Assignment?> GetForUpdateAsync(int id, CancellationToken ct);
+
+    Task<bool> AnyForTaskAsync(int houseTaskId, CancellationToken ct);
 }

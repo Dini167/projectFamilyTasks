@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Npgsql;
+using projectFamilyTasks.Application.Common.Constants;
 using projectFamilyTasks.Application.Exceptions;
 using projectFamilyTasks.Application.Interfaces.Repositories;
 
@@ -27,8 +29,17 @@ public class UnitOfWork : IUnitOfWork
             var entities = string.Join(", ", ex.Entries.Select(entry => entry.Metadata.ClrType.Name));
             _logger.LogWarning("Concurrency conflict while saving changes to: {Entities}", entities);
 
-            throw new ConflictException(
-                "הנתונים שונו בינתיים על ידי משתמש אחר, למשל אח שתפס את אותה משימה. יש לרענן ולנסות שוב.");
+            throw new ConflictException(ErrorMessages.ConcurrencyConflict);
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
+        {
+            _logger.LogWarning("Unique value violation while saving changes");
+            throw new ConflictException(ErrorMessages.DuplicateValue);
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.ForeignKeyViolation })
+        {
+            _logger.LogWarning("Foreign key violation while saving changes");
+            throw new ConflictException(ErrorMessages.InUse);
         }
     }
 }

@@ -12,6 +12,8 @@ public class RoundProfile : Profile
 
         CreateMap<Round, RoundResponseDto>();
 
+        CreateMap<Round, RoundSummaryDto>();
+
         CreateMap<Assignment, AssignmentResponseDto>().IncludeMembers(a => a.HouseTask);
         CreateMap<HouseTask, AssignmentResponseDto>(MemberList.None);
 

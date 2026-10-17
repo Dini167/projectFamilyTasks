@@ -6,4 +6,6 @@ namespace projectFamilyTasks.Application.Interfaces.Repositories;
 public interface IChatMessageRepository : IGenericRepository<ChatMessage>
 {
     Task<PagedResultDto<ChatMessage>> GetPagedAsync(PagedQueryDto query, CancellationToken ct);
+
+    Task<ChatMessage?> GetByIdWithSenderAsync(int id, CancellationToken ct);
 }

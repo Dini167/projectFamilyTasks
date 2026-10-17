@@ -10,4 +10,6 @@ public interface IRoundRepository : IGenericRepository<Round>
     Task<Round?> GetSummaryAsync(int roundId, CancellationToken ct);
 
     Task<PagedResultDto<Round>> GetPagedAsync(PagedQueryDto query, CancellationToken ct);
+
+    Task<Round?> GetForUpdateAsync(int id, CancellationToken ct);
 }
