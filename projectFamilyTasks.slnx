@@ -3,4 +3,5 @@
   <Project Path="projectFamilyTasks.Application/projectFamilyTasks.Application.csproj" />
   <Project Path="projectFamilyTasks.Domain/projectFamilyTasks.Domain.csproj" />
   <Project Path="projectFamilyTasks.Infrastructure/projectFamilyTasks.Infrastructure.csproj" />
+  <Project Path="projectFamilyTasks.Tests/projectFamilyTasks.Tests.csproj" />
 </Solution>
