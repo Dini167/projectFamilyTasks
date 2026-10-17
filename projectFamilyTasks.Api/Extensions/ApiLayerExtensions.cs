@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using projectFamilyTasks.Api.Middleware;
 using projectFamilyTasks.Application.Common.Constants;
 using projectFamilyTasks.Application.DTOs;
@@ -8,11 +9,15 @@ namespace projectFamilyTasks.Api.Extensions;
 
 public static class ApiLayerExtensions
 {
-    private static readonly Regex HasHebrew = new("[֐-׿]", RegexOptions.Compiled);
+    private static readonly Regex HasHebrew = new(@"\p{IsHebrew}", RegexOptions.Compiled);
 
     public static IServiceCollection AddApiLayer(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddControllers(options => HebrewBindingMessages.Apply(options.ModelBindingMessageProvider))
+        services.AddControllers(options =>
+            {
+                HebrewBindingMessages.Apply(options.ModelBindingMessageProvider);
+                options.Conventions.Add(new RouteTokenTransformerConvention(new KebabCaseParameterTransformer()));
+            })
             .ConfigureApiBehaviorOptions(options =>
                 options.InvalidModelStateResponseFactory = BuildValidationResponse);
 
