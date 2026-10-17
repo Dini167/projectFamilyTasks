@@ -6,23 +6,31 @@ namespace projectFamilyTasks.Application.DTOs.HouseTasks;
 
 public class HouseTaskRequestDto
 {
-    [Required, MaxLength(ValidationLimits.DescriptionMaxLength)]
+    [Display(Name = "תיאור המשימה")]
+    [Required(ErrorMessage = ValidationMessages.Required)]
+    [MaxLength(ValidationLimits.DescriptionMaxLength, ErrorMessage = ValidationMessages.MaxLength)]
     public string Description { get; set; } = string.Empty;
 
-    [Range(0, ValidationLimits.MaxChildAge)]
+    [Display(Name = "גיל מינימלי")]
+    [Range(0, ValidationLimits.MaxChildAge, ErrorMessage = ValidationMessages.RangeBetween)]
     public int MinAge { get; set; }
 
-    [Range(1, 600)]
+    [Display(Name = "זמן משוער בדקות")]
+    [Range(1, 600, ErrorMessage = ValidationMessages.RangeBetween)]
     public int EstimatedMinutes { get; set; }
 
-    [EnumDataType(typeof(TimeOfDay))]
+    [Display(Name = "זמן ביום")]
+    [EnumDataType(typeof(TimeOfDay), ErrorMessage = ValidationMessages.InvalidChoice)]
     public TimeOfDay TimeOfDay { get; set; }
 
-    [EnumDataType(typeof(Frequency))]
+    [Display(Name = "תדירות")]
+    [EnumDataType(typeof(Frequency), ErrorMessage = ValidationMessages.InvalidChoice)]
     public Frequency Frequency { get; set; }
 
-    [Range(1, 1000)]
+    [Display(Name = "ערך הנקודות")]
+    [Range(1, 1000, ErrorMessage = ValidationMessages.RangeBetween)]
     public int PointsValue { get; set; }
 
+    [Display(Name = "קטגוריות")]
     public List<int> CategoryIds { get; set; } = new();
 }

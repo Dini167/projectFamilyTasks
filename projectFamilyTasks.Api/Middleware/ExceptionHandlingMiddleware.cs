@@ -1,4 +1,4 @@
-using projectFamilyTasks.Application.DTOs;
+using projectFamilyTasks.Application.Common.Constants;
 using projectFamilyTasks.Application.Exceptions;
 
 namespace projectFamilyTasks.Api.Middleware;
@@ -31,7 +31,7 @@ public class ExceptionHandlingMiddleware
                 _logger.LogInformation("Handled error {StatusCode}: {Message}", ex.StatusCode, ex.Message);
             }
 
-            await WriteErrorAsync(context, ex.StatusCode, ex.Message);
+            await ErrorResponseWriter.WriteAsync(context, ex.StatusCode, ex.Message);
         }
         catch (Exception ex)
         {
@@ -40,21 +40,8 @@ public class ExceptionHandlingMiddleware
                 _logger.LogError(ex, "Unhandled exception");
             }
 
-            await WriteErrorAsync(context, StatusCodes.Status500InternalServerError,
-                "אירעה שגיאה בלתי צפויה. יש לנסות שוב מאוחר יותר.");
+            await ErrorResponseWriter.WriteAsync(
+                context, StatusCodes.Status500InternalServerError, ErrorMessages.Unexpected);
         }
-    }
-
-    private static async Task WriteErrorAsync(HttpContext context, int statusCode, string message)
-    {
-        var response = new ErrorResponseDto
-        {
-            Status = statusCode,
-            Message = message,
-            CorrelationId = context.GetCorrelationId()
-        };
-
-        context.Response.StatusCode = statusCode;
-        await context.Response.WriteAsJsonAsync(response);
     }
 }

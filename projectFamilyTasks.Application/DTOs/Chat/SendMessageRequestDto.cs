@@ -5,6 +5,8 @@ namespace projectFamilyTasks.Application.DTOs.Chat;
 
 public class SendMessageRequestDto
 {
-    [Required, MaxLength(ValidationLimits.MessageMaxLength)]
+    [Display(Name = "תוכן ההודעה")]
+    [Required(ErrorMessage = ValidationMessages.Required)]
+    [MaxLength(ValidationLimits.MessageMaxLength, ErrorMessage = ValidationMessages.MaxLength)]
     public string Content { get; set; } = string.Empty;
 }

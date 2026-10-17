@@ -1,14 +1,18 @@
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using projectFamilyTasks.Api.Middleware;
+using projectFamilyTasks.Application.Common.Constants;
 using projectFamilyTasks.Application.DTOs;
 
 namespace projectFamilyTasks.Api.Extensions;
 
 public static class ApiLayerExtensions
 {
+    private static readonly Regex HasHebrew = new("[֐-׿]", RegexOptions.Compiled);
+
     public static IServiceCollection AddApiLayer(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddControllers()
+        services.AddControllers(options => HebrewBindingMessages.Apply(options.ModelBindingMessageProvider))
             .ConfigureApiBehaviorOptions(options =>
                 options.InvalidModelStateResponseFactory = BuildValidationResponse);
 
@@ -31,15 +35,16 @@ public static class ApiLayerExtensions
 
     private static IActionResult BuildValidationResponse(ActionContext context)
     {
-        var errors = context.ModelState
-            .Where(entry => entry.Value?.Errors.Count > 0)
-            .SelectMany(entry => entry.Value!.Errors.Select(error => $"{entry.Key}: {error.ErrorMessage}"))
+        var errors = context.ModelState.Values
+            .SelectMany(entry => entry.Errors)
+            .Select(error => HasHebrew.IsMatch(error.ErrorMessage) ? error.ErrorMessage : ErrorMessages.InvalidFormat)
+            .Distinct()
             .ToList();
 
         var response = new ErrorResponseDto
         {
             Status = StatusCodes.Status400BadRequest,
-            Message = "הנתונים שנשלחו אינם תקינים.",
+            Message = ErrorMessages.InvalidData,
             CorrelationId = context.HttpContext.GetCorrelationId(),
             Errors = errors
         };

@@ -5,9 +5,12 @@ namespace projectFamilyTasks.Application.DTOs.Children;
 
 public class UpdateChildRequestDto
 {
-    [Required, MaxLength(ValidationLimits.NameMaxLength)]
+    [Display(Name = "שם")]
+    [Required(ErrorMessage = ValidationMessages.Required)]
+    [MaxLength(ValidationLimits.NameMaxLength, ErrorMessage = ValidationMessages.MaxLength)]
     public string Name { get; set; } = string.Empty;
 
-    [Range(1, ValidationLimits.MaxChildAge)]
+    [Display(Name = "גיל")]
+    [Range(1, ValidationLimits.MaxChildAge, ErrorMessage = ValidationMessages.RangeBetween)]
     public int Age { get; set; }
 }
