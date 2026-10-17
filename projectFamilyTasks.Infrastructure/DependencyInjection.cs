@@ -5,6 +5,7 @@ using projectFamilyTasks.Application.Interfaces.Repositories;
 using projectFamilyTasks.Application.Interfaces.Services;
 using projectFamilyTasks.Infrastructure.Persistence;
 using projectFamilyTasks.Infrastructure.Persistence.Repositories;
+using projectFamilyTasks.Infrastructure.Persistence.Seed;
 using projectFamilyTasks.Infrastructure.Security;
 using projectFamilyTasks.Infrastructure.Settings;
 
@@ -21,6 +22,7 @@ public static class DependencyInjection
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
 
         services.Configure<SeedSettings>(configuration.GetSection(SeedSettings.SectionName));
+        services.AddScoped<DbSeeder>();
 
         services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
 
