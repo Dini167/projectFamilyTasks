@@ -2,8 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using projectFamilyTasks.Application.Interfaces.Repositories;
+using projectFamilyTasks.Application.Interfaces.Services;
 using projectFamilyTasks.Infrastructure.Persistence;
 using projectFamilyTasks.Infrastructure.Persistence.Repositories;
+using projectFamilyTasks.Infrastructure.Security;
 using projectFamilyTasks.Infrastructure.Settings;
 
 namespace projectFamilyTasks.Infrastructure;
@@ -17,6 +19,8 @@ public static class DependencyInjection
             options.UseNpgsql(configuration.GetConnectionString("Default")));
 
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
+
+        services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
