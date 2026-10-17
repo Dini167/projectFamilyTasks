@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using projectFamilyTasks.Domain.Common;
 using projectFamilyTasks.Domain.Entities;
 
 namespace projectFamilyTasks.Infrastructure.Persistence;
@@ -24,5 +25,19 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+    }
+
+    public override Task<int> SaveChangesAsync(
+        bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        var changedEntries = ChangeTracker.Entries<IHasVersion>()
+            .Where(entry => entry.State is EntityState.Added or EntityState.Modified);
+
+        foreach (var entry in changedEntries)
+        {
+            entry.Entity.Version = Guid.NewGuid();
+        }
+
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 }
