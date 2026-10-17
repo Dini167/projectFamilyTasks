@@ -113,4 +113,25 @@ public class AssignmentServiceTests
         Assert.Null(assignment.AssignedAt);
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
+
+    [Fact]
+    public async Task TakeAsync_UnitOfWorkReportsConflict_ConflictPropagatesToCaller()
+    {
+        // Arrange: תרחיש תקין לגמרי, אבל השמירה "נכשלת" כי ילד אחר שמר ראשון.
+        var round = OpenRound(quota: 2);
+        var child = ChildOf(id: 5, age: 9);
+        var assignment = FreeAssignment(id: 10, roundId: round.Id, minAge: 8);
+        GivenChildTakes(round, child, assignment, alreadyTaken: 0);
+        _unitOfWork.Setup(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new ConflictException(ErrorMessages.ConcurrencyConflict));
+
+        // Act: הילדה מנסה לתפוס, והשמירה זורקת התנגשות.
+        var error = await Assert.ThrowsAsync<ConflictException>(
+            () => _service.TakeAsync(assignment.Id, CancellationToken.None));
+
+        // Assert: השגיאה עברה הלאה כמות שהיא (409 וההודעה בעברית), והשירות אכן ניסה לשמור פעם אחת.
+        Assert.Equal(409, error.StatusCode);
+        Assert.Equal(ErrorMessages.ConcurrencyConflict, error.Message);
+        _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
 }
