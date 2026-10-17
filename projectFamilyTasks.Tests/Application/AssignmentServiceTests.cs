@@ -40,4 +40,33 @@ public class AssignmentServiceTests
     {
         return new Assignment { Id = id, RoundId = roundId, HouseTask = new HouseTask { MinAge = minAge } };
     }
+
+    private void GivenChildTakes(Round round, Child child, Assignment assignment, int alreadyTaken)
+    {
+        _rounds.Setup(r => r.GetCurrentAsync(It.IsAny<CancellationToken>())).ReturnsAsync(round);
+        _currentUser.Setup(u => u.UserId).Returns(child.Id);
+        _members.Setup(m => m.GetChildAsync(child.Id, It.IsAny<CancellationToken>())).ReturnsAsync(child);
+        _assignments.Setup(a => a.GetForUpdateAsync(assignment.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(assignment);
+        _assignments.Setup(a => a.CountByChildAsync(round.Id, child.Id, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(alreadyTaken);
+    }
+
+    [Fact]
+    public async Task TakeAsync_FreeSuitableAssignmentUnderQuota_AssignsChildAndSavesOnce()
+    {
+        // Arrange: ילדה בת 9, משימה מגיל 8, ועוד לא נתפסה אף משימה בסבב עם מכסה של 2.
+        var round = OpenRound(quota: 2);
+        var child = ChildOf(id: 5, age: 9);
+        var assignment = FreeAssignment(id: 10, roundId: round.Id, minAge: 8);
+        GivenChildTakes(round, child, assignment, alreadyTaken: 0);
+
+        // Act: הילדה תופסת את המשימה.
+        await _service.TakeAsync(assignment.Id, CancellationToken.None);
+
+        // Assert: השיבוץ שייך לה, נרשם מתי נתפס, והשמירה נקראה בדיוק פעם אחת.
+        Assert.Equal(child.Id, assignment.ChildId);
+        Assert.NotNull(assignment.AssignedAt);
+        _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
 }
