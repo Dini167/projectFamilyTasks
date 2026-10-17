@@ -24,5 +24,7 @@ public class AssignmentConfiguration : IEntityTypeConfiguration<Assignment>
             .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasIndex(a => new { a.RoundId, a.HouseTaskId }).IsUnique();
+
+        builder.Property(a => a.Version).IsConcurrencyToken();
     }
 }
