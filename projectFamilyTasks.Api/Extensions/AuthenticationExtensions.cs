@@ -1,6 +1,8 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using projectFamilyTasks.Api.Services;
+using projectFamilyTasks.Application.Interfaces.Services;
 using projectFamilyTasks.Infrastructure.Settings;
 
 namespace projectFamilyTasks.Api.Extensions;
@@ -30,6 +32,9 @@ public static class AuthenticationExtensions
             });
 
         services.AddAuthorization();
+
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         return services;
     }
