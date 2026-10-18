@@ -21,7 +21,5 @@ services:
         sync: false
       - key: Seed__InitialParentsPassword
         sync: false
-      - key: Seed__DemoPassword
-        sync: false
       - key: Recovery__ParentsPasswordResetKey
         sync: false
