@@ -44,7 +44,9 @@ public class HouseTaskRepository : GenericRepository<HouseTask>, IHouseTaskRepos
 
     public async Task<HouseTask?> GetByIdWithCategoriesAsync(int id, CancellationToken ct)
     {
-        return await Context.HouseTasks.AsNoTracking().Include(t => t.Categories).FirstOrDefaultAsync(t => t.Id == id, ct);
+        return await Context.HouseTasks.AsNoTracking()
+            .Include(t => t.Categories)
+            .FirstOrDefaultAsync(t => t.Id == id, ct);
     }
 
     public async Task<List<int>> GetAllIdsAsync(CancellationToken ct)

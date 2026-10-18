@@ -22,6 +22,8 @@ public class ChatMessageRepository : GenericRepository<ChatMessage>, IChatMessag
 
     public async Task<ChatMessage?> GetByIdWithSenderAsync(int id, CancellationToken ct)
     {
-        return await Context.ChatMessages.AsNoTracking().Include(m => m.Sender).FirstOrDefaultAsync(m => m.Id == id, ct);
+        return await Context.ChatMessages.AsNoTracking()
+            .Include(m => m.Sender)
+            .FirstOrDefaultAsync(m => m.Id == id, ct);
     }
 }

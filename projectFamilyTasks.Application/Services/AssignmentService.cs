@@ -32,7 +32,8 @@ public class AssignmentService : IAssignmentService
         _mapper = mapper;
     }
 
-    public async Task<PagedResultDto<AssignmentResponseDto>> GetAvailableAsync(PagedQueryDto query, CancellationToken ct)
+    public async Task<PagedResultDto<AssignmentResponseDto>> GetAvailableAsync(
+        PagedQueryDto query, CancellationToken ct)
     {
         var round = await _rounds.GetCurrentAsync(ct);
         if (round is null || round.Status != RoundStatus.OpenForSelection)
@@ -75,7 +76,8 @@ public class AssignmentService : IAssignmentService
     public async Task AssignToChildAsync(int assignmentId, int childId, CancellationToken ct)
     {
         var round = await _rounds.GetCurrentAsync(ct) ?? throw new BadRequestException(ErrorMessages.NoCurrentRound);
-        var child = await _members.GetChildAsync(childId, ct) ?? throw new NotFoundException(ErrorMessages.ChildNotFound);
+        var child = await _members.GetChildAsync(childId, ct)
+                    ?? throw new NotFoundException(ErrorMessages.ChildNotFound);
         if (!child.IsApproved)
             throw new BadRequestException(ErrorMessages.ChildNotApproved);
 

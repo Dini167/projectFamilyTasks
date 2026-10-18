@@ -213,7 +213,8 @@ public class AssignmentServiceTests
         _rounds.Setup(r => r.GetCurrentAsync(It.IsAny<CancellationToken>())).ReturnsAsync((Round?)null);
 
         // Act: הילד מבקש לראות משימות של אחים.
-        var page = await _service.GetSiblingsAsync(new PagedQueryDto { Page = 1, PageSize = 10 }, CancellationToken.None);
+        var page = await _service.GetSiblingsAsync(
+            new PagedQueryDto { Page = 1, PageSize = 10 }, CancellationToken.None);
 
         // Assert: תוצאה ריקה, ובסיס הנתונים לא נשאל.
         Assert.Equal(0, page.TotalCount);
