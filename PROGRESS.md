@@ -103,3 +103,21 @@
 
 **ממתין להחלטת המשתמשת:** התחברות `gh auth login` (לפתיחת PR אוטומטית), אימייל לזהות ה-commits, והאם להוסיף
 `.claude/` ל-git או ל-`.gitignore`. בסוף הפרויקט מומלץ להוסיף CI (GitHub Actions) ובדיקת אינטגרציה אחת.
+
+## 5. עדכון (2026-10-19): מה נוסף מאז ומה נשאר
+**שלב 16 (לקוח React, ריפו `projectFamilyTasks-client`) הושלם**, ועוד מעבר ל-Plan: ניהול משימות ומחיקה (הורה), ניהול סבב,
+אישור ילדים ואיפוס סיסמה, שיבוץ ילד על ידי הורה, החלפת סיסמת הורים (חובה בכניסה ראשונה), שחזור סיסמת הורים, צ'אט והחלפות.
+כל משימה בענף ו-PR משלה (שרשרת ענפים, כל PR נפתח מקודמו; למזג לפי הסדר).
+
+**שינויים בשרת מעבר ל-Plan:**
+- משימה שאף ילד לא לקח נמחקת גם אחרי פתיחת סבב. `DELETE api/rounds/{roundId}/assignments/{assignmentId}` מסיר משימה פנויה מהסבב בלבד.
+- Seed: 24 משימות לבסיס ריק. `GET api/children/me` (מאזן נקודות). `PUT api/children/{id}/password` (הורה מאפס סיסמת ילד).
+- `POST api/auth/reset-parents-password`: מפתח חירום מ-`Recovery__ParentsPasswordResetKey` (לפחות 16 תווים, 5 ניסיונות ל-15 דקות).
+  בפיתוח: 16 אפסים ב-`appsettings.Development.json`. **בענן להגדיר מפתח חזק כמשתנה סביבה.**
+- מכסה: ילד בוחר עד פי שניים מהמכסה, וסבב לא מתחיל עד שכל ילד הגיע למינימום (`RoundRules`).
+- אכיפה בשרת של החלפת סיסמה חובה (`PasswordChangeRequiredMiddleware`, `[AllowWhenPasswordChangeRequired]`).
+- `GET api/assignments?scope=siblings` לבקשות החלפה. `Dockerfile` ו-`.dockerignore` (משימה 17.2).
+
+**נשאר:** 17.1, 17.3-17.6 (Render: חשבון, Web Service, Static Site, בדיקה מקצה לקצה), 18.1-18.7. שם ילד ייחודי (דורש migration), עריכת פרטים
+ולוח מעקב נדחו. **לפני העלאה:** להחליט על רישיון AutoMapper, לדומיין פרטי (נטפרי), ולעדכן את בסיס הנתונים האמיתי (8 משימות בלבד).
+בדפדפן: להגדיר ב-Render `Cors__AllowedOrigins__0` ו-`VITE_API_URL` בלקוח.

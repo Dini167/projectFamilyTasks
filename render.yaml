@@ -1,0 +1,27 @@
+databases:
+  - name: familytasks-db
+    plan: free
+    databaseName: familytasks
+    user: familytasks
+
+services:
+  - type: web
+    name: familytasks-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /swagger/index.html
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: JwtSettings__Key
+        generateValue: true
+      - key: ConnectionStrings__Default
+        sync: false
+      - key: Cors__AllowedOrigins__0
+        sync: false
+      - key: Seed__InitialParentsPassword
+        sync: false
+      - key: Seed__DemoPassword
+        sync: false
+      - key: Recovery__ParentsPasswordResetKey
+        sync: false
