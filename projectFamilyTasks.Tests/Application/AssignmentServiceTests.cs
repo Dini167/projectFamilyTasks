@@ -134,4 +134,57 @@ public class AssignmentServiceTests
         Assert.Equal(ErrorMessages.ConcurrencyConflict, error.Message);
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
+
+    [Fact]
+    public async Task RemoveFromRoundAsync_FreeAssignmentInCurrentRound_RemovesItAndSavesOnce()
+    {
+        // Arrange: סבב נוכחי ושיבוץ פנוי שלא נתפס על ידי אף ילד.
+        var round = OpenRound();
+        var assignment = FreeAssignment(id: 10, roundId: round.Id, minAge: 8);
+        _rounds.Setup(r => r.GetCurrentAsync(It.IsAny<CancellationToken>())).ReturnsAsync(round);
+        _assignments.Setup(a => a.GetForUpdateAsync(10, It.IsAny<CancellationToken>())).ReturnsAsync(assignment);
+
+        // Act: ההורה מסיר את המשימה מהסבב.
+        await _service.RemoveFromRoundAsync(round.Id, assignment.Id, CancellationToken.None);
+
+        // Assert: השיבוץ נמחק ונשמר פעם אחת.
+        _assignments.Verify(a => a.Remove(assignment), Times.Once);
+        _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task RemoveFromRoundAsync_AssignmentAlreadyTaken_ThrowsConflictAndRemovesNothing()
+    {
+        // Arrange: ילדה כבר תפסה את המשימה.
+        var round = OpenRound();
+        var assignment = FreeAssignment(id: 10, roundId: round.Id, minAge: 8);
+        assignment.ChildId = 5;
+        _rounds.Setup(r => r.GetCurrentAsync(It.IsAny<CancellationToken>())).ReturnsAsync(round);
+        _assignments.Setup(a => a.GetForUpdateAsync(10, It.IsAny<CancellationToken>())).ReturnsAsync(assignment);
+
+        // Act: ההורה מנסה להסיר משימה שנתפסה.
+        var error = await Assert.ThrowsAsync<ConflictException>(
+            () => _service.RemoveFromRoundAsync(round.Id, assignment.Id, CancellationToken.None));
+
+        // Assert: 409 עם הודעה בעברית, ושום דבר לא נמחק ולא נשמר.
+        Assert.Equal(ErrorMessages.AssignmentTaken, error.Message);
+        _assignments.Verify(a => a.Remove(It.IsAny<Assignment>()), Times.Never);
+        _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task RemoveFromRoundAsync_AssignmentOfAnotherRound_ThrowsNotFound()
+    {
+        // Arrange: השיבוץ שייך לסבב אחר מהסבב הנוכחי.
+        var round = OpenRound(id: 2);
+        var assignment = FreeAssignment(id: 10, roundId: 1, minAge: 8);
+        _rounds.Setup(r => r.GetCurrentAsync(It.IsAny<CancellationToken>())).ReturnsAsync(round);
+        _assignments.Setup(a => a.GetForUpdateAsync(10, It.IsAny<CancellationToken>())).ReturnsAsync(assignment);
+
+        // Act and Assert: 404 עם הודעה בעברית, ושום דבר לא נמחק.
+        var error = await Assert.ThrowsAsync<NotFoundException>(
+            () => _service.RemoveFromRoundAsync(round.Id, assignment.Id, CancellationToken.None));
+        Assert.Equal(ErrorMessages.AssignmentNotFound, error.Message);
+        _assignments.Verify(a => a.Remove(It.IsAny<Assignment>()), Times.Never);
+    }
 }

@@ -90,6 +90,19 @@ public class AssignmentService : IAssignmentService
         await _unitOfWork.SaveChangesAsync(ct);
     }
 
+    public async Task RemoveFromRoundAsync(int roundId, int assignmentId, CancellationToken ct)
+    {
+        var round = await _rounds.GetCurrentAsync(ct) ?? throw new BadRequestException(ErrorMessages.NoCurrentRound);
+        var assignment = await _assignments.GetForUpdateAsync(assignmentId, ct);
+        if (assignment is null || round.Id != roundId || assignment.RoundId != roundId)
+            throw new NotFoundException(ErrorMessages.AssignmentNotFound);
+        if (assignment.ChildId is not null)
+            throw new ConflictException(ErrorMessages.AssignmentTaken);
+
+        _assignments.Remove(assignment);
+        await _unitOfWork.SaveChangesAsync(ct);
+    }
+
     private async Task<Child> GetCurrentChildAsync(CancellationToken ct)
     {
         return await _members.GetChildAsync(_currentUser.UserId, ct)
