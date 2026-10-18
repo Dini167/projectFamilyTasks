@@ -70,7 +70,11 @@ public class AssignmentService : IAssignmentService
         if (round.Status != RoundStatus.OpenForSelection)
             throw new BadRequestException(ErrorMessages.SelectionClosed);
 
-        await AssignAsync(assignmentId, await GetCurrentChildAsync(ct), round, ct);
+        var child = await GetCurrentChildAsync(ct);
+        if (!child.IsApproved)
+            throw new ForbiddenException(ErrorMessages.ChildPendingApproval);
+
+        await AssignAsync(assignmentId, child, round, ct);
     }
 
     public async Task AssignToChildAsync(int assignmentId, int childId, CancellationToken ct)

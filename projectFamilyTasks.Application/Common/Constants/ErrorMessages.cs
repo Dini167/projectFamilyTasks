@@ -19,7 +19,8 @@ public static class ErrorMessages
 
     public const string LoginFailed = "שם המשתמש או הסיסמה שגויים.";
     public const string UserNameTaken = "שם המשתמש כבר תפוס. יש לבחור שם משתמש אחר.";
-    public const string ChildPendingApproval = "החשבון ממתין לאישור של אחד ההורים. אפשר להתחבר לאחר האישור.";
+    public const string ChildPendingApproval =
+        "החשבון ממתין לאישור של אחד ההורים. עד האישור אי אפשר לבחור משימות או לבצע פעולות.";
     public const string ParentsPasswordWrong = "סיסמת ההורים שגויה.";
     public const string CurrentPasswordWrong = "הסיסמה הנוכחית שגויה.";
     public const string RecoveryKeyWrong = "מפתח השחזור שגוי או שלא הוגדר.";

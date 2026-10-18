@@ -74,6 +74,25 @@ public class AssignmentServiceTests
     }
 
     [Fact]
+    public async Task TakeAsync_ChildNotYetApproved_ThrowsForbiddenAndAssignsNothing()
+    {
+        // Arrange: ילדה שעדיין לא אושרה על ידי הורה מנסה לתפוס משימה פנויה.
+        var round = OpenRound();
+        var child = ChildOf(id: 5, age: 9);
+        child.IsApproved = false;
+        var assignment = FreeAssignment(id: 10, roundId: round.Id, minAge: 8);
+        GivenChildTakes(round, child, assignment, alreadyTaken: 0);
+
+        // Act + Assert: נזרקת ForbiddenException, והשיבוץ והשמירה לא קורים.
+        var error = await Assert.ThrowsAsync<ForbiddenException>(
+            () => _service.TakeAsync(assignment.Id, CancellationToken.None));
+
+        Assert.Equal(ErrorMessages.ChildPendingApproval, error.Message);
+        Assert.Null(assignment.ChildId);
+        _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
     public async Task TakeAsync_AssignmentAlreadyTaken_ThrowsConflictAndDoesNotSave()
     {
         // Arrange: המשימה כבר שייכת לילד אחר (מספר 99), והילדה (מספר 5) מנסה לתפוס אותה.

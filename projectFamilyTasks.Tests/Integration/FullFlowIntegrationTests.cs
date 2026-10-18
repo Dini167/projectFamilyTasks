@@ -5,7 +5,6 @@ namespace projectFamilyTasks.Tests.Integration;
 
 public class FullFlowIntegrationTests : IClassFixture<ApiFactory>
 {
-    private const string NewParentsPassword = "ParentPass2026";
     private const string ChildPassword = "child12345";
 
     private readonly ApiFactory _factory;
@@ -18,7 +17,7 @@ public class FullFlowIntegrationTests : IClassFixture<ApiFactory>
     [PostgresFact]
     public async Task ParentAndChild_RunAFullRound_ChildGetsThePoints()
     {
-        var parent = await LoginParentAndChangePasswordAsync();
+        var parent = await _factory.LoginParentAfterChangingPasswordAsync("ParentPass2026");
         await RegisterAndApproveChildAsync(parent);
 
         var round = await parent.PostAsJsonAsync("/api/rounds", new { tasksQuotaPerChild = 1 });
@@ -37,27 +36,9 @@ public class FullFlowIntegrationTests : IClassFixture<ApiFactory>
         Assert.Equal(pointsEarned, (await profile.ReadJsonAsync()).GetProperty("pointsBalance").GetInt32());
     }
 
-    private async Task<HttpClient> LoginParentAndChangePasswordAsync()
-    {
-        var parent = await _factory.LoginAsync(
-            "parent", ApiFactory.InitialParentsPassword, expectMustChangePassword: true);
-        var change = await parent.PutAsJsonAsync("/api/auth/parents-password", new
-        {
-            currentPassword = ApiFactory.InitialParentsPassword,
-            newPassword = NewParentsPassword
-        });
-        await change.AssertStatusAsync(HttpStatusCode.NoContent);
-
-        return await _factory.LoginAsync("parent", NewParentsPassword);
-    }
-
     private async Task RegisterAndApproveChildAsync(HttpClient parent)
     {
-        var register = await _factory.CreateClient().PostAsJsonAsync("/api/auth/register", new
-        {
-            name = "ילד בדיקה", userName = "kid1", password = ChildPassword, age = 9
-        });
-        await register.AssertStatusAsync(HttpStatusCode.Created);
+        await _factory.RegisterChildAsync("kid1", ChildPassword);
 
         var children = await parent.GetAsync("/api/children");
         await children.AssertStatusAsync(HttpStatusCode.OK);
