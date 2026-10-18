@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.*" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="Moq" Version="4.21.0" />
@@ -26,6 +27,7 @@
     <ProjectReference Include="..\projectFamilyTasks.Domain\projectFamilyTasks.Domain.csproj" />
     <ProjectReference Include="..\projectFamilyTasks.Application\projectFamilyTasks.Application.csproj" />
     <ProjectReference Include="..\projectFamilyTasks.Infrastructure\projectFamilyTasks.Infrastructure.csproj" />
+    <ProjectReference Include="..\projectFamilyTasks.Api\projectFamilyTasks.Api.csproj" />
   </ItemGroup>
 
 </Project>
