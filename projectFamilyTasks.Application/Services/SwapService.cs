@@ -61,7 +61,8 @@ public class SwapService : ISwapService
             SenderId = _currentUser.UserId,
             SwapRequest = swap,
             SentAt = now,
-            Content = string.Format(ErrorMessages.SwapChatText, mine.HouseTask.Description, target.HouseTask.Description)
+            Content = string.Format(
+                ErrorMessages.SwapChatText, mine.HouseTask.Description, target.HouseTask.Description)
         }, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 

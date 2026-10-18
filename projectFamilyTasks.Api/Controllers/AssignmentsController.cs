@@ -21,7 +21,10 @@ public class AssignmentsController : BaseApiController
         _completions = completions;
     }
 
-    /// <summary>רשימת שיבוצים: scope=available פנויות שמתאימות לגיל, scope=mine שלי, או scope=siblings משימות שנבחרו על ידי אחים (לבקשת החלפה).</summary>
+    /// <summary>
+    /// רשימת שיבוצים: scope=available פנויות שמתאימות לגיל, scope=mine שלי,
+    /// או scope=siblings משימות שנבחרו על ידי אחים (לבקשת החלפה).
+    /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(PagedResultDto<AssignmentResponseDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PagedResultDto<AssignmentResponseDto>>> GetAll(

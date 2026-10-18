@@ -89,7 +89,8 @@ public class RoundService : IRoundService
 
         var summary = _mapper.Map<RoundSummaryDto>(round);
         summary.Children = children.Select(child => BuildChildSummary(child, round, totals)).ToList();
-        summary.UnassignedTasks = _mapper.Map<List<AssignmentResponseDto>>(round.Assignments.Where(a => a.ChildId is null));
+        summary.UnassignedTasks = _mapper.Map<List<AssignmentResponseDto>>(
+            round.Assignments.Where(a => a.ChildId is null));
 
         return summary;
     }

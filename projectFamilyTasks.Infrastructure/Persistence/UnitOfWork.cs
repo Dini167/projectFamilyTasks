@@ -31,12 +31,14 @@ public class UnitOfWork : IUnitOfWork
 
             throw new ConflictException(ErrorMessages.ConcurrencyConflict);
         }
-        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
+        catch (DbUpdateException ex)
+            when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation })
         {
             _logger.LogWarning("Unique value violation while saving changes");
             throw new ConflictException(ErrorMessages.DuplicateValue);
         }
-        catch (DbUpdateException ex) when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.ForeignKeyViolation })
+        catch (DbUpdateException ex)
+            when (ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.ForeignKeyViolation })
         {
             _logger.LogWarning("Foreign key violation while saving changes");
             throw new ConflictException(ErrorMessages.InUse);
