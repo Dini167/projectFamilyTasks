@@ -7,5 +7,8 @@ public interface ITaskCompletionRepository : IGenericRepository<TaskCompletion>
 {
     Task<int> CountSinceAsync(int assignmentId, DateTime sinceUtc, CancellationToken ct);
 
+    Task<IReadOnlyList<CompletionStamp>> GetSinceAsync(
+        IReadOnlyCollection<int> assignmentIds, DateTime sinceUtc, CancellationToken ct);
+
     Task<IReadOnlyList<ChildCompletionTotal>> GetTotalsByRoundAsync(int roundId, CancellationToken ct);
 }

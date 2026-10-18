@@ -16,6 +16,7 @@ public class AssignmentServiceTests
     private readonly Mock<IAssignmentRepository> _assignments = new();
     private readonly Mock<IRoundRepository> _rounds = new();
     private readonly Mock<IFamilyMemberRepository> _members = new();
+    private readonly Mock<ITaskCompletionRepository> _completions = new();
     private readonly Mock<ICurrentUserService> _currentUser = new();
     private readonly Mock<IUnitOfWork> _unitOfWork = new();
     private readonly Mock<IMapper> _mapper = new();
@@ -25,7 +26,7 @@ public class AssignmentServiceTests
     public AssignmentServiceTests()
     {
         _service = new AssignmentService(
-            _assignments.Object, _rounds.Object, _members.Object,
+            _assignments.Object, _rounds.Object, _members.Object, _completions.Object,
             _currentUser.Object, _unitOfWork.Object, _mapper.Object);
     }
 

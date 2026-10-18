@@ -16,17 +16,20 @@ public class AssignmentService : IAssignmentService
     private readonly IAssignmentRepository _assignments;
     private readonly IRoundRepository _rounds;
     private readonly IFamilyMemberRepository _members;
+    private readonly ITaskCompletionRepository _completions;
     private readonly ICurrentUserService _currentUser;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
     public AssignmentService(
         IAssignmentRepository assignments, IRoundRepository rounds, IFamilyMemberRepository members,
-        ICurrentUserService currentUser, IUnitOfWork unitOfWork, IMapper mapper)
+        ITaskCompletionRepository completions, ICurrentUserService currentUser, IUnitOfWork unitOfWork,
+        IMapper mapper)
     {
         _assignments = assignments;
         _rounds = rounds;
         _members = members;
+        _completions = completions;
         _currentUser = currentUser;
         _unitOfWork = unitOfWork;
         _mapper = mapper;
@@ -51,7 +54,9 @@ public class AssignmentService : IAssignmentService
             return EmptyPage(query);
 
         var page = await _assignments.GetByChildPagedAsync(round.Id, _currentUser.UserId, query, ct);
-        return _mapper.MapPaged<Assignment, AssignmentResponseDto>(page);
+        var result = _mapper.MapPaged<Assignment, AssignmentResponseDto>(page);
+        await AddCompletionProgressAsync(result.Items, ct);
+        return result;
     }
 
     public async Task<PagedResultDto<AssignmentResponseDto>> GetSiblingsAsync(PagedQueryDto query, CancellationToken ct)
@@ -117,6 +122,23 @@ public class AssignmentService : IAssignmentService
 
         _assignments.Remove(assignment);
         await _unitOfWork.SaveChangesAsync(ct);
+    }
+
+    private async Task AddCompletionProgressAsync(
+        IReadOnlyList<AssignmentResponseDto> items, CancellationToken ct)
+    {
+        if (items.Count == 0)
+            return;
+
+        var now = DateTime.UtcNow;
+        var ids = items.Select(i => i.Id).ToList();
+        var stamps = await _completions.GetSinceAsync(ids, LocalTime.StartOfWeekUtc(now), ct);
+        foreach (var item in items)
+        {
+            var (limit, since) = FrequencyRules.GetPeriod(item.Frequency, now);
+            item.PeriodLimit = limit;
+            item.CompletionsInPeriod = stamps.Count(s => s.AssignmentId == item.Id && s.CompletedAt >= since);
+        }
     }
 
     private async Task<Child> GetCurrentChildAsync(CancellationToken ct)
