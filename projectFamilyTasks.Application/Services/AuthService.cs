@@ -110,9 +110,6 @@ public class AuthService : IAuthService
         var member = await _members.GetByIdAsync(_currentUser.UserId, ct)
                      ?? throw new UnauthorizedException(ErrorMessages.UserNotFound);
 
-        if (member is Child { IsApproved: false })
-            throw new ForbiddenException(ErrorMessages.ChildPendingApproval);
-
         var isParent = member is Parent;
         var mustChange = isParent && (await GetAccessAsync(ct)).MustChangePassword;
         var role = isParent ? Roles.Parent : Roles.Child;
@@ -133,8 +130,6 @@ public class AuthService : IAuthService
     {
         if (!_hasher.Verify(password, child.PasswordHash))
             throw new UnauthorizedException(ErrorMessages.LoginFailed);
-        if (!child.IsApproved)
-            throw new ForbiddenException(ErrorMessages.ChildPendingApproval);
 
         return BuildResponse(child.Id, child.Name, Roles.Child, mustChangePassword: false);
     }

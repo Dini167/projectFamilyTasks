@@ -21,6 +21,30 @@ public static class ApiClientExtensions
         return client;
     }
 
+    public static async Task<HttpClient> LoginParentAfterChangingPasswordAsync(
+        this ApiFactory factory, string newPassword)
+    {
+        var parent = await factory.LoginAsync(
+            "parent", ApiFactory.InitialParentsPassword, expectMustChangePassword: true);
+        var change = await parent.PutAsJsonAsync("/api/auth/parents-password", new
+        {
+            currentPassword = ApiFactory.InitialParentsPassword,
+            newPassword
+        });
+        await change.AssertStatusAsync(HttpStatusCode.NoContent);
+
+        return await factory.LoginAsync("parent", newPassword);
+    }
+
+    public static async Task RegisterChildAsync(this ApiFactory factory, string userName, string password)
+    {
+        var register = await factory.CreateClient().PostAsJsonAsync("/api/auth/register", new
+        {
+            name = "ילד בדיקה", userName, password, age = 9
+        });
+        await register.AssertStatusAsync(HttpStatusCode.Created);
+    }
+
     public static async Task<JsonElement> ReadJsonAsync(this HttpResponseMessage response)
     {
         var text = await response.Content.ReadAsStringAsync();
