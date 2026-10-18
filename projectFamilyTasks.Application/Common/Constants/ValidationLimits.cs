@@ -10,4 +10,5 @@ public static class ValidationLimits
     public const int MaxChildAge = 20;
     public const int DescriptionMaxLength = 200;
     public const int MessageMaxLength = 500;
+    public const int MaxPageNumber = 100_000;
 }
