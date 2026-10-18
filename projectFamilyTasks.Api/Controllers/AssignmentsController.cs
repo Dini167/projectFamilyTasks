@@ -21,15 +21,18 @@ public class AssignmentsController : BaseApiController
         _completions = completions;
     }
 
-    /// <summary>רשימת שיבוצים: scope=available למשימות פנויות שמתאימות לגיל, או scope=mine למשימות שלי.</summary>
+    /// <summary>רשימת שיבוצים: scope=available פנויות שמתאימות לגיל, scope=mine שלי, או scope=siblings משימות שנבחרו על ידי אחים (לבקשת החלפה).</summary>
     [HttpGet]
     [ProducesResponseType(typeof(PagedResultDto<AssignmentResponseDto>), StatusCodes.Status200OK)]
     public async Task<ActionResult<PagedResultDto<AssignmentResponseDto>>> GetAll(
         [FromQuery] AssignmentQueryDto query, CancellationToken ct)
     {
-        var page = query.Scope == AssignmentScope.Mine
-            ? await _assignments.GetMineAsync(query, ct)
-            : await _assignments.GetAvailableAsync(query, ct);
+        var page = query.Scope switch
+        {
+            AssignmentScope.Mine => await _assignments.GetMineAsync(query, ct),
+            AssignmentScope.Siblings => await _assignments.GetSiblingsAsync(query, ct),
+            _ => await _assignments.GetAvailableAsync(query, ct)
+        };
 
         return Ok(page);
     }

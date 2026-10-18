@@ -11,6 +11,9 @@ public interface IAssignmentRepository : IGenericRepository<Assignment>
     Task<PagedResultDto<Assignment>> GetByChildPagedAsync(
         int roundId, int childId, PagedQueryDto query, CancellationToken ct);
 
+    Task<PagedResultDto<Assignment>> GetSiblingsPagedAsync(
+        int roundId, int childId, PagedQueryDto query, CancellationToken ct);
+
     Task<int> CountByChildAsync(int roundId, int childId, CancellationToken ct);
 
     Task<Assignment?> GetForUpdateAsync(int id, CancellationToken ct);

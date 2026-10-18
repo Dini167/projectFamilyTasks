@@ -1,6 +1,7 @@
 using AutoMapper;
 using Moq;
 using projectFamilyTasks.Application.Common.Constants;
+using projectFamilyTasks.Application.DTOs;
 using projectFamilyTasks.Application.Exceptions;
 using projectFamilyTasks.Application.Interfaces.Repositories;
 using projectFamilyTasks.Application.Interfaces.Services;
@@ -203,5 +204,38 @@ public class AssignmentServiceTests
         // Assert: המשימה נרשמה על שמה והשינוי נשמר פעם אחת.
         Assert.Equal(child.Id, assignment.ChildId);
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetSiblingsAsync_NoCurrentRound_ReturnsEmptyPageWithoutQueryingTheRepository()
+    {
+        // Arrange: אין סבב נוכחי.
+        _rounds.Setup(r => r.GetCurrentAsync(It.IsAny<CancellationToken>())).ReturnsAsync((Round?)null);
+
+        // Act: הילד מבקש לראות משימות של אחים.
+        var page = await _service.GetSiblingsAsync(new PagedQueryDto { Page = 1, PageSize = 10 }, CancellationToken.None);
+
+        // Assert: תוצאה ריקה, ובסיס הנתונים לא נשאל.
+        Assert.Equal(0, page.TotalCount);
+        _assignments.Verify(a => a.GetSiblingsPagedAsync(
+            It.IsAny<int>(), It.IsAny<int>(), It.IsAny<PagedQueryDto>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetSiblingsAsync_CurrentRound_AsksForTheSiblingsOfTheCurrentChildOnly()
+    {
+        // Arrange: סבב נוכחי וילד מחובר עם מזהה 5.
+        var round = OpenRound(id: 3);
+        _rounds.Setup(r => r.GetCurrentAsync(It.IsAny<CancellationToken>())).ReturnsAsync(round);
+        _currentUser.Setup(u => u.UserId).Returns(5);
+        var query = new PagedQueryDto { Page = 1, PageSize = 10 };
+        _assignments.Setup(a => a.GetSiblingsPagedAsync(3, 5, query, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new PagedResultDto<Assignment>());
+
+        // Act: הילד מבקש לראות משימות של אחים.
+        await _service.GetSiblingsAsync(query, CancellationToken.None);
+
+        // Assert: השאילתה נשלחה עם מזהה הסבב ומזהה הילד המחובר (כדי להוציא את המשימות שלו עצמו).
+        _assignments.Verify(a => a.GetSiblingsPagedAsync(3, 5, query, It.IsAny<CancellationToken>()), Times.Once);
     }
 }

@@ -8,6 +8,7 @@ public interface IAssignmentService
     Task<PagedResultDto<AssignmentResponseDto>> GetAvailableAsync(PagedQueryDto query, CancellationToken ct);
 
     Task<PagedResultDto<AssignmentResponseDto>> GetMineAsync(PagedQueryDto query, CancellationToken ct);
+    Task<PagedResultDto<AssignmentResponseDto>> GetSiblingsAsync(PagedQueryDto query, CancellationToken ct);
 
     Task TakeAsync(int assignmentId, CancellationToken ct);
 

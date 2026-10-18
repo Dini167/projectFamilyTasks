@@ -53,6 +53,16 @@ public class AssignmentService : IAssignmentService
         return _mapper.MapPaged<Assignment, AssignmentResponseDto>(page);
     }
 
+    public async Task<PagedResultDto<AssignmentResponseDto>> GetSiblingsAsync(PagedQueryDto query, CancellationToken ct)
+    {
+        var round = await _rounds.GetCurrentAsync(ct);
+        if (round is null)
+            return EmptyPage(query);
+
+        var page = await _assignments.GetSiblingsPagedAsync(round.Id, _currentUser.UserId, query, ct);
+        return _mapper.MapPaged<Assignment, AssignmentResponseDto>(page);
+    }
+
     public async Task TakeAsync(int assignmentId, CancellationToken ct)
     {
         var round = await _rounds.GetCurrentAsync(ct) ?? throw new BadRequestException(ErrorMessages.NoOpenSelection);

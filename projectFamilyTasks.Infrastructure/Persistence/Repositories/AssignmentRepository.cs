@@ -28,6 +28,15 @@ public class AssignmentRepository : GenericRepository<Assignment>, IAssignmentRe
         return await ToPagedResultAsync(mine, query, ct);
     }
 
+    public async Task<PagedResultDto<Assignment>> GetSiblingsPagedAsync(
+        int roundId, int childId, PagedQueryDto query, CancellationToken ct)
+    {
+        var siblings = Context.Assignments
+            .Where(a => a.RoundId == roundId && a.ChildId != null && a.ChildId != childId);
+
+        return await ToPagedResultAsync(siblings, query, ct);
+    }
+
     public async Task<int> CountByChildAsync(int roundId, int childId, CancellationToken ct)
     {
         return await Context.Assignments
@@ -47,6 +56,7 @@ public class AssignmentRepository : GenericRepository<Assignment>, IAssignmentRe
         return await assignments
             .AsNoTracking()
             .Include(a => a.HouseTask)
+            .Include(a => a.Child)
             .OrderBy(a => a.HouseTask.Description)
             .ThenBy(a => a.Id)
             .ToPagedResultAsync(query.Page, query.PageSize, ct);
