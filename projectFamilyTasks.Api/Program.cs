@@ -33,6 +33,8 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
+app.UseMiddleware<PasswordChangeRequiredMiddleware>();
+
 app.MapControllers();
 
 await app.InitializeDatabaseAsync();

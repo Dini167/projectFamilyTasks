@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using projectFamilyTasks.Api.Extensions;
+using projectFamilyTasks.Api.Middleware;
 using projectFamilyTasks.Application.Common.Constants;
 using projectFamilyTasks.Application.DTOs;
 using projectFamilyTasks.Application.DTOs.Auth;
@@ -67,6 +68,7 @@ public class AuthController : BaseApiController
 
     /// <summary>החלפת סיסמת ההורים המשותפת. להורים בלבד.</summary>
     [Authorize(Roles = Roles.Parent)]
+    [AllowWhenPasswordChangeRequired]
     [HttpPut("parents-password")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> ChangeParentsPassword(
@@ -77,6 +79,7 @@ public class AuthController : BaseApiController
     }
 
     /// <summary>חידוש הטוקן, בלי להאריך מעבר ל-5 שעות מההתחברות המקורית.</summary>
+    [AllowWhenPasswordChangeRequired]
     [HttpPost("refresh")]
     [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
     public async Task<ActionResult<AuthResponseDto>> Refresh(CancellationToken ct)
