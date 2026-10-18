@@ -14,4 +14,5 @@ public interface IChildService
     Task UpdateAsync(int id, UpdateChildRequestDto request, CancellationToken ct);
 
     Task DeleteAsync(int id, CancellationToken ct);
+    Task ResetPasswordAsync(int id, ResetChildPasswordRequestDto request, CancellationToken ct);
 }

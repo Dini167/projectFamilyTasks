@@ -14,12 +14,15 @@ public class ChildService : IChildService
 {
     private readonly IFamilyMemberRepository _members;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IPasswordHasher _hasher;
     private readonly IMapper _mapper;
 
-    public ChildService(IFamilyMemberRepository members, IUnitOfWork unitOfWork, IMapper mapper)
+    public ChildService(
+        IFamilyMemberRepository members, IUnitOfWork unitOfWork, IPasswordHasher hasher, IMapper mapper)
     {
         _members = members;
         _unitOfWork = unitOfWork;
+        _hasher = hasher;
         _mapper = mapper;
     }
 
@@ -56,6 +59,13 @@ public class ChildService : IChildService
     {
         var child = await GetForUpdateAsync(id, ct);
         _members.Remove(child);
+        await _unitOfWork.SaveChangesAsync(ct);
+    }
+
+    public async Task ResetPasswordAsync(int id, ResetChildPasswordRequestDto request, CancellationToken ct)
+    {
+        var child = await GetForUpdateAsync(id, ct);
+        child.PasswordHash = _hasher.Hash(request.NewPassword);
         await _unitOfWork.SaveChangesAsync(ct);
     }
 
