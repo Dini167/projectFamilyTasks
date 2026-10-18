@@ -24,6 +24,7 @@ public static class ErrorMessages
     public const string CurrentPasswordWrong = "הסיסמה הנוכחית שגויה.";
     public const string RecoveryKeyWrong = "מפתח השחזור שגוי או שלא הוגדר.";
     public const string TooManyAttempts = "יותר מדי ניסיונות. יש לנסות שוב מאוחר יותר.";
+    public const string PasswordChangeRequired = "יש להחליף את סיסמת ההורים ההתחלתית לפני שימוש במערכת.";
     public const string ParentAccessMissing = "הגדרות ההורים טרם אותחלו. יש לפנות למנהל המערכת.";
     public const string UserNotFound = "המשתמש לא נמצא. יש להתחבר מחדש.";
 
