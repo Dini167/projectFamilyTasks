@@ -67,9 +67,10 @@ public class HouseTaskService : IHouseTaskService
     public async Task DeleteAsync(int id, CancellationToken ct)
     {
         var task = await _tasks.GetByIdAsync(id, ct) ?? throw new NotFoundException(ErrorMessages.TaskNotFound);
-        if (await _assignments.AnyForTaskAsync(id, ct))
+        if (await _assignments.AnyTakenForTaskAsync(id, ct))
             throw new ConflictException(ErrorMessages.TaskHasAssignments);
 
+        await _assignments.RemoveUnassignedForTaskAsync(id, ct);
         _tasks.Remove(task);
         await _unitOfWork.SaveChangesAsync(ct);
     }
