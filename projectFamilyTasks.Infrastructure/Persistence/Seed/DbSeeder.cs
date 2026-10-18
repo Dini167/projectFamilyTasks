@@ -28,7 +28,6 @@ public class DbSeeder
     {
         await SeedTasksAsync(ct);
         await SeedParentAsync(ct);
-        await SeedDemoChildrenAsync(ct);
     }
 
     private async Task SeedTasksAsync(CancellationToken ct)
@@ -94,26 +93,6 @@ public class DbSeeder
         _logger.LogInformation("Seeded the first parent (the initial password must be changed on first login)");
     }
 
-    private async Task SeedDemoChildrenAsync(CancellationToken ct)
-    {
-        if (await _context.Children.AnyAsync(ct))
-            return;
-        if (string.IsNullOrWhiteSpace(_settings.DemoPassword))
-        {
-            _logger.LogWarning("Seed:DemoPassword is not set, so no demo children were created");
-            return;
-        }
-
-        var passwordHash = _hasher.Hash(_settings.DemoPassword);
-        _context.Children.AddRange(
-            NewChild("yossi", "יוסי", 6, passwordHash),
-            NewChild("dana", "דנה", 9, passwordHash),
-            NewChild("noa", "נועה", 13, passwordHash));
-
-        await _context.SaveChangesAsync(ct);
-        _logger.LogInformation("Seeded 3 demo children");
-    }
-
     private static HouseTask NewTask(
         string description, int minAge, int minutes, TimeOfDay timeOfDay, Frequency frequency, int points,
         params Category[] categories)
@@ -127,18 +106,6 @@ public class DbSeeder
             Frequency = frequency,
             PointsValue = points,
             Categories = categories.ToList()
-        };
-    }
-
-    private static Child NewChild(string userName, string name, int age, string passwordHash)
-    {
-        return new Child
-        {
-            UserName = userName,
-            Name = name,
-            Age = age,
-            PasswordHash = passwordHash,
-            IsApproved = true
         };
     }
 }

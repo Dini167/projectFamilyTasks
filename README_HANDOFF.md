@@ -49,7 +49,7 @@
 1. Docker: קונטיינר `pg` (PostgreSQL 16, פורט 5432). סודות ב-User Secrets (`ConnectionStrings:Default`, `JwtSettings:Key`).
 2. שרת: `dotnet run --project projectFamilyTasks.Api --launch-profile http` (פורט 5231; לא להריץ בזמן build כי הקבצים ננעלים).
 3. לקוח: `npm run dev` בתיקיית הלקוח (פורט 5173), קובץ `.env` עם `VITE_API_URL=http://localhost:5231` (לא נכנס לגיט).
-4. משתמשי דמו: `parent`/`0000000` (חובה להחליף), `yossi` (6), `dana` (9), `noa` (13) עם `demo1234`.
+4. נתוני פתיחה: הורה `parent`/`0000000` (חובה להחליף) ו-24 משימות. אין ילדי דמו, ילדים נרשמים בעצמם.
 5. בדיקות מול דפדפן אמיתי נעשו עם `puppeteer-core` ב-`%TEMP%\e2e` (מחוץ לפרויקטים) מול שרת על בסיס זמני `familytasks_ui_tmp` שנמחק אחרי.
 
 ### 5.7 כללי עבודה של המשתמשת (חשובים לשיחה חדשה)
