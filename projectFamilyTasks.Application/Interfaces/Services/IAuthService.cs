@@ -12,6 +12,7 @@ public interface IAuthService
     Task<AuthResponseDto> RegisterParentAsync(RegisterParentRequestDto request, CancellationToken ct);
 
     Task ChangeParentsPasswordAsync(ChangeParentsPasswordRequestDto request, CancellationToken ct);
+    Task ResetParentsPasswordAsync(ResetParentsPasswordRequestDto request, CancellationToken ct);
 
     Task<AuthResponseDto> RefreshAsync(CancellationToken ct);
 }

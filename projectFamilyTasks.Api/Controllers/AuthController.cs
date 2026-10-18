@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using projectFamilyTasks.Api.Extensions;
 using projectFamilyTasks.Application.Common.Constants;
 using projectFamilyTasks.Application.DTOs;
 using projectFamilyTasks.Application.DTOs.Auth;
@@ -48,6 +50,19 @@ public class AuthController : BaseApiController
     {
         var response = await _auth.RegisterParentAsync(request, ct);
         return StatusCode(StatusCodes.Status201Created, response);
+    }
+
+    /// <summary>שחזור סיסמת ההורים עם מפתח חירום שהוגדר בשרת. מוגבל בקצב ניסיונות.</summary>
+    [AllowAnonymous]
+    [EnableRateLimiting(RateLimitingExtensions.RecoveryPolicy)]
+    [HttpPost("reset-parents-password")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status429TooManyRequests)]
+    public async Task<IActionResult> ResetParentsPassword(
+        [FromBody] ResetParentsPasswordRequestDto request, CancellationToken ct)
+    {
+        await _auth.ResetParentsPasswordAsync(request, ct);
+        return NoContent();
     }
 
     /// <summary>החלפת סיסמת ההורים המשותפת. להורים בלבד.</summary>

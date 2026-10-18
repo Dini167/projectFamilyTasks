@@ -23,6 +23,7 @@ public static class ApiLayerExtensions
 
         services.AddSwaggerWithJwt();
         services.AddCorsFromConfiguration(configuration);
+        services.AddRecoveryRateLimiting();
 
         return services;
     }

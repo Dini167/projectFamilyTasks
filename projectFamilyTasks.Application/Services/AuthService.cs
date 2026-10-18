@@ -15,18 +15,21 @@ public class AuthService : IAuthService
     private readonly IParentAccessRepository _access;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPasswordHasher _hasher;
+    private readonly IRecoveryKeyValidator _recovery;
     private readonly ITokenService _tokens;
     private readonly ICurrentUserService _currentUser;
     private readonly IMapper _mapper;
 
     public AuthService(
         IFamilyMemberRepository members, IParentAccessRepository access, IUnitOfWork unitOfWork,
-        IPasswordHasher hasher, ITokenService tokens, ICurrentUserService currentUser, IMapper mapper)
+        IPasswordHasher hasher, IRecoveryKeyValidator recovery, ITokenService tokens,
+        ICurrentUserService currentUser, IMapper mapper)
     {
         _members = members;
         _access = access;
         _unitOfWork = unitOfWork;
         _hasher = hasher;
+        _recovery = recovery;
         _tokens = tokens;
         _currentUser = currentUser;
         _mapper = mapper;
@@ -84,6 +87,18 @@ public class AuthService : IAuthService
         if (!_hasher.Verify(request.CurrentPassword, access.PasswordHash))
             throw new BadRequestException(ErrorMessages.CurrentPasswordWrong);
 
+        access.PasswordHash = _hasher.Hash(request.NewPassword);
+        access.MustChangePassword = false;
+
+        await _unitOfWork.SaveChangesAsync(ct);
+    }
+
+    public async Task ResetParentsPasswordAsync(ResetParentsPasswordRequestDto request, CancellationToken ct)
+    {
+        if (!_recovery.IsValid(request.RecoveryKey))
+            throw new BadRequestException(ErrorMessages.RecoveryKeyWrong);
+
+        var access = await GetAccessAsync(ct);
         access.PasswordHash = _hasher.Hash(request.NewPassword);
         access.MustChangePassword = false;
 
