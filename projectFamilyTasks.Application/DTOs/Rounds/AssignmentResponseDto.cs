@@ -15,4 +15,6 @@ public class AssignmentResponseDto
     public int? ChildId { get; init; }
     public string? ChildName { get; init; }
     public DateTime? AssignedAt { get; init; }
+    public int CompletionsInPeriod { get; set; }
+    public int PeriodLimit { get; set; }
 }

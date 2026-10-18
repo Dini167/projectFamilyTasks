@@ -17,6 +17,16 @@ public class TaskCompletionRepository : GenericRepository<TaskCompletion>, ITask
             .CountAsync(c => c.AssignmentId == assignmentId && c.CompletedAt >= sinceUtc, ct);
     }
 
+    public async Task<IReadOnlyList<CompletionStamp>> GetSinceAsync(
+        IReadOnlyCollection<int> assignmentIds, DateTime sinceUtc, CancellationToken ct)
+    {
+        return await Context.TaskCompletions
+            .AsNoTracking()
+            .Where(c => assignmentIds.Contains(c.AssignmentId) && c.CompletedAt >= sinceUtc)
+            .Select(c => new CompletionStamp(c.AssignmentId, c.CompletedAt))
+            .ToListAsync(ct);
+    }
+
     public async Task<IReadOnlyList<ChildCompletionTotal>> GetTotalsByRoundAsync(int roundId, CancellationToken ct)
     {
         return await Context.TaskCompletions
