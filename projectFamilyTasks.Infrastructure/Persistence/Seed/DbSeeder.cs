@@ -51,10 +51,26 @@ public class DbSeeder
             NewTask("הסעת הקטנים למוסדות", 13, 30, TimeOfDay.Morning, Frequency.Daily, 12, rides),
             NewTask("קיפול כביסה", 7, 20, TimeOfDay.Noon, Frequency.TwiceAWeek, 6, laundry),
             NewTask("ניקוי חדר המגורים", 10, 30, TimeOfDay.Weekly, Frequency.Weekly, 8, cleaning, tidying),
-            NewTask("הכנות לשבת", 11, 40, TimeOfDay.Weekly, Frequency.Weekly, 10, tidying, kitchen));
+            NewTask("הכנות לשבת", 11, 40, TimeOfDay.Weekly, Frequency.Weekly, 10, tidying, kitchen),
+            NewTask("סידור המיטה", 4, 5, TimeOfDay.Morning, Frequency.Daily, 2, tidying),
+            NewTask("סידור הצעצועים והמשחקים", 4, 10, TimeOfDay.Evening, Frequency.Daily, 3, tidying),
+            NewTask("סידור הנעליים בכניסה", 5, 5, TimeOfDay.Evening, Frequency.Daily, 2, tidying),
+            NewTask("פינוי הכלים מהשולחן", 6, 10, TimeOfDay.Evening, Frequency.Daily, 3, kitchen),
+            NewTask("השקיית הצמחים", 6, 10, TimeOfDay.Morning, Frequency.TwiceAWeek, 3, tidying),
+            NewTask("סידור הבגדים בארונות", 7, 15, TimeOfDay.Weekly, Frequency.Weekly, 4, laundry, tidying),
+            NewTask("ייבוש וסידור הכלים בארון", 7, 10, TimeOfDay.Evening, Frequency.Daily, 3, kitchen),
+            NewTask("טאטוא הרצפה", 8, 15, TimeOfDay.Evening, Frequency.Daily, 4, cleaning),
+            NewTask("הכנת כריכים לבית הספר", 9, 15, TimeOfDay.Morning, Frequency.Daily, 4, kitchen),
+            NewTask("תליית כביסה", 9, 20, TimeOfDay.Morning, Frequency.TwiceAWeek, 5, laundry),
+            NewTask("ניקוי אבק", 9, 20, TimeOfDay.Weekly, Frequency.Weekly, 5, cleaning),
+            NewTask("הכנת שולחן שבת", 10, 30, TimeOfDay.Weekly, Frequency.Weekly, 8, tidying, kitchen),
+            NewTask("הפעלת מכונת כביסה", 11, 10, TimeOfDay.Noon, Frequency.TwiceAWeek, 4, laundry),
+            NewTask("הוצאת פחי מחזור", 11, 10, TimeOfDay.Weekly, Frequency.Weekly, 3, cleaning),
+            NewTask("שטיפת הרצפה", 12, 25, TimeOfDay.Weekly, Frequency.Weekly, 7, cleaning),
+            NewTask("ניקוי שירותים ואמבטיה", 13, 25, TimeOfDay.Weekly, Frequency.Weekly, 8, cleaning));
 
         await _context.SaveChangesAsync(ct);
-        _logger.LogInformation("Seeded 5 categories and 8 house tasks");
+        _logger.LogInformation("Seeded 5 categories and 24 house tasks");
     }
 
     private async Task SeedParentAsync(CancellationToken ct)

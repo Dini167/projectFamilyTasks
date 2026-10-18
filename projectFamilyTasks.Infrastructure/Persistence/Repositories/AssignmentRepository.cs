@@ -52,8 +52,18 @@ public class AssignmentRepository : GenericRepository<Assignment>, IAssignmentRe
             .ToPagedResultAsync(query.Page, query.PageSize, ct);
     }
 
-    public async Task<bool> AnyForTaskAsync(int houseTaskId, CancellationToken ct)
+    public async Task<bool> AnyTakenForTaskAsync(int houseTaskId, CancellationToken ct)
     {
-        return await Context.Assignments.AnyAsync(a => a.HouseTaskId == houseTaskId, ct);
+        return await Context.Assignments.AnyAsync(
+            a => a.HouseTaskId == houseTaskId
+                 && (a.ChildId != null || Context.TaskCompletions.Any(c => c.AssignmentId == a.Id)), ct);
+    }
+
+    public async Task RemoveUnassignedForTaskAsync(int houseTaskId, CancellationToken ct)
+    {
+        var unassigned = await Context.Assignments
+            .Where(a => a.HouseTaskId == houseTaskId && a.ChildId == null)
+            .ToListAsync(ct);
+        Context.Assignments.RemoveRange(unassigned);
     }
 }

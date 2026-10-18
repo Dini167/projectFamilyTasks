@@ -32,7 +32,7 @@ public static class ErrorMessages
 
     public const string TaskNotFound = "המשימה לא נמצאה.";
     public const string CategoryNotFound = "אחת מהקטגוריות שנבחרו אינה קיימת.";
-    public const string TaskHasAssignments = "לא ניתן למחוק משימה שכבר שובצה בסבב.";
+    public const string TaskHasAssignments = "לא ניתן למחוק משימה שילד כבר לקח או ביצע.";
 
     public const string RoundNotFound = "הסבב לא נמצא.";
     public const string NoCurrentRound = "אין כרגע סבב פתוח או פעיל.";

@@ -15,5 +15,7 @@ public interface IAssignmentRepository : IGenericRepository<Assignment>
 
     Task<Assignment?> GetForUpdateAsync(int id, CancellationToken ct);
 
-    Task<bool> AnyForTaskAsync(int houseTaskId, CancellationToken ct);
+    Task<bool> AnyTakenForTaskAsync(int houseTaskId, CancellationToken ct);
+
+    Task RemoveUnassignedForTaskAsync(int houseTaskId, CancellationToken ct);
 }
