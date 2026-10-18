@@ -1,13 +1,31 @@
 # projectFamilyTasks
 
+שרת (Web API) של מערכת לניהול משימות הבית וחלוקת תפקידים במשפחה. הלקוח (React) נמצא בריפו נפרד:
+`projectFamilyTasks-client`.
+
 ## על המערכת
 
 מערכת לניהול משימות הבית וחלוקת תפקידים במשפחה ברוכת ילדים. ההורים מגדירים משימות (עם גיל מינימלי, זמן משוער,
-תדירות וערך נקודות), פותחים סבב בחירה וקובעים כמה משימות כל ילד רשאי לבחור באותו סבב. הילדים נרשמים, ממתינים
+תדירות וערך נקודות), פותחים סבב בחירה וקובעים כמה משימות כל ילד נדרש לבחור באותו סבב. הילדים נרשמים, ממתינים
 לאישור הורה, ורואים בסבב רק משימות שמתאימות לגילם. הילד תופס משימות לפי הכלל "הראשון שמגיע מקבל", מסמן "ביצעתי"
 וצובר נקודות. החלפת משימה בין ילדים עוברת אישור דו-שלבי: האח מאשר, ואז הורה מאשר, ורק אז השיבוץ מתעדכן. בנוסף יש
-צ'אט משפחתי אחד פתוח לכל החברים. השרת בנוי ב-.NET 8 (Web API) בארבע שכבות: Domain, Application, Infrastructure ו-API,
-עם PostgreSQL והזדהות באמצעות JWT.
+צ'אט משפחתי אחד פתוח לכל החברים. השרת בנוי ב-.NET 8 בארבע שכבות, עם PostgreSQL והזדהות באמצעות JWT.
+
+**כללי המכסה:** המכסה שההורה קובע בסבב היא המינימום. ילד רשאי לבחור עד פי שניים ממנה. סבב לא מתחיל (מעבר ל"פעיל")
+עד שכל ילד מאושר הגיע למינימום, או לכל המשימות שמתאימות לגילו אם יש פחות. הורה יכול לשבץ ילד שלא בחר.
+
+## ארכיטקטורה
+
+| פרויקט | תפקיד |
+|---|---|
+| `projectFamilyTasks.Domain` | ישויות ו-enums, בלי תלות בשום שכבה |
+| `projectFamilyTasks.Application` | שירותים, DTOs, ממשקים, כללים עסקיים והודעות שגיאה בעברית. בלי EF Core |
+| `projectFamilyTasks.Infrastructure` | EF Core ו-PostgreSQL, repositories, `UnitOfWork`, BCrypt, JWT, Seed |
+| `projectFamilyTasks.Api` | Controllers, Middleware, אימות והרשאות, Swagger, NLog |
+| `projectFamilyTasks.Tests` | xUnit ו-Moq (שכבת Application), ובדיקת התחרות על SQLite בזיכרון |
+
+תהליך בקשה: Controller ← Service (Application) ← Repository / `UnitOfWork` (Infrastructure) ← PostgreSQL.
+שגיאות עסקיות נזרקות כחריגים ומתורגמות בעברית ל-JSON אחיד (`ErrorResponseDto`) על ידי `ExceptionHandlingMiddleware`.
 
 ## המשאב המוגבל והתחרות עליו
 
@@ -36,7 +54,7 @@
    dotnet user-secrets set "JwtSettings:Key" "<מפתח-אקראי-באורך-32-תווים-לפחות>" --project projectFamilyTasks.Api
    ```
 
-3. הפעלת השרת:
+3. הפעלת השרת (חשוב להריץ מתיקיית הפרויקט או עם `--project`, כדי ש-`appsettings.Development.json` ייטען):
 
    ```
    dotnet run --project projectFamilyTasks.Api --launch-profile http
@@ -47,10 +65,12 @@
 
 4. הרצת הבדיקות: `dotnet test projectFamilyTasks.slnx`
 
+5. הלקוח: ראו את ה-README של `projectFamilyTasks-client`. הוא מצפה לשרת ב-`http://localhost:5231` ולכן
+   `Cors:AllowedOrigins` בפיתוח כולל את `http://localhost:5173`.
+
 ## משתמשי דמו
 
-הנתונים נוצרים אוטומטית בעליית השרת הראשונה (Seed). הסיסמאות הן סיסמאות פיתוח בלבד, ובענן הן מוגדרות במשתני
-הסביבה `Seed__InitialParentsPassword` ו-`Seed__DemoPassword`.
+הנתונים נוצרים אוטומטית בעליית השרת הראשונה (Seed): 24 משימות ו-5 קטגוריות. הסיסמאות הן סיסמאות פיתוח בלבד.
 
 | תפקיד (Role) | שם משתמש | סיסמה | הערות |
 |---|---|---|---|
@@ -60,3 +80,44 @@
 | ילד (Child) | `noa` | `demo1234` | בת 13 |
 
 ילדי הדמו כבר מאושרים. ילד שנרשם בעצמו ממתין לאישור של הורה.
+
+## נקודות הקצה העיקריות
+
+| נתיב | הרשאה | תיאור |
+|---|---|---|
+| `POST api/auth/login`, `register`, `register-parent` | פתוח | כניסה, הרשמת ילד, הרשמת הורה נוסף |
+| `PUT api/auth/parents-password`, `POST api/auth/refresh` | הורה / מחובר | החלפת סיסמת ההורים, חידוש טוקן |
+| `POST api/auth/reset-parents-password` | פתוח, מוגבל קצב | שחזור סיסמת הורים עם מפתח חירום |
+| `api/house-tasks`, `api/categories` | הורה לכתיבה | משימות וקטגוריות (מחיקה רק למשימה שלא נלקחה) |
+| `api/rounds` | הורה | פתיחת סבב, שינוי מצב, סיכום, הסרת משימה פנויה מהסבב |
+| `api/children` | הורה | אישור, עדכון, איפוס סיסמה, הסרה, שיבוץ משימה לילד |
+| `GET api/children/me` | ילד | הפרטים ומאזן הנקודות שלי |
+| `GET api/assignments?scope=available/mine/siblings` | ילד | משימות פנויות, שלי, ושל אחים |
+| `PUT api/assignments/{id}/assignee`, `POST .../completions` | ילד | תפיסת משימה, סימון ביצוע |
+| `api/swap-requests` | ילד ויתר | בקשת החלפה ואישור דו-שלבי |
+| `api/messages` | כולם | הצ'אט המשפחתי |
+
+התיעוד המלא והניסוי בכל נקודה נמצאים ב-Swagger.
+
+## אבטחה
+
+- סיסמאות נשמרות רק כ-hash של BCrypt. הסיסמה, ה-hash והטוקן לא נכתבים ללוג.
+- JWT תקף 60 דקות, עם תקרה של 5 שעות מההתחברות הראשונה (`session_start`).
+- בכניסה ראשונה הורה חייב להחליף סיסמה, וה-`PasswordChangeRequiredMiddleware` חוסם בשרת כל פעולה אחרת עד אז.
+- שחזור סיסמת הורים: `Recovery__ParentsPasswordResetKey` (16 תווים לפחות). בלי המפתח השחזור כבוי.
+  ב-`appsettings.Development.json` מוגדר מפתח פיתוח בלבד.
+- כל הודעות השגיאה למשתמש בעברית, ושגיאות ולידציה לא מחזירות את הערכים שהוקלדו.
+
+## פריסה (Render)
+
+`Dockerfile` ו-`render.yaml` בשורש. ב-Render יוצרים Blueprint מהריפו ומזינים בדשבורד את המשתנים:
+
+| משתנה | משמעות |
+|---|---|
+| `ConnectionStrings__Default` | `Host=...;Port=5432;Database=...;Username=...;Password=...;SSL Mode=Require` |
+| `JwtSettings__Key` | נוצר אוטומטית (32 תווים לפחות) |
+| `Cors__AllowedOrigins__0` | כתובת הלקוח |
+| `Seed__InitialParentsPassword`, `Seed__DemoPassword` | סיסמאות ההורה הראשון וילדי הדמו |
+| `Recovery__ParentsPasswordResetKey` | מפתח חירום חזק, לא נשמר בקוד |
+
+**הערות:** כתובות `onrender.com` עלולות להיחסם בנטפרי ולכן מומלץ דומיין פרטי. AutoMapper בייצור דורש רישיון.
