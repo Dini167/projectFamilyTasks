@@ -50,6 +50,17 @@ public class ChildrenController : BaseApiController
         return NoContent();
     }
 
+    /// <summary>הורה קובע סיסמה חדשה לילד ששכח את הסיסמה שלו.</summary>
+    [HttpPut("{id:int}/password")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ResetPassword(
+        [FromRoute] int id, [FromBody] ResetChildPasswordRequestDto request, CancellationToken ct)
+    {
+        await _children.ResetPasswordAsync(id, request, ct);
+        return NoContent();
+    }
+
     /// <summary>הסרת ילד, לשימוש בהרשמה כפולה בטעות.</summary>
     [HttpDelete("{id:int}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
