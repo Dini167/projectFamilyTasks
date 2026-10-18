@@ -81,7 +81,7 @@ public class AssignmentService : IAssignmentService
             throw new ConflictException(ErrorMessages.AssignmentTaken);
         if (assignment.HouseTask.MinAge > child.Age)
             throw new BadRequestException(ErrorMessages.TaskNotSuitableForAge);
-        if (await _assignments.CountByChildAsync(round.Id, child.Id, ct) >= round.TasksQuotaPerChild)
+        if (await _assignments.CountByChildAsync(round.Id, child.Id, ct) >= RoundRules.MaxTasksPerChild(round))
             throw new BadRequestException(ErrorMessages.QuotaReached);
 
         assignment.ChildId = child.Id;
