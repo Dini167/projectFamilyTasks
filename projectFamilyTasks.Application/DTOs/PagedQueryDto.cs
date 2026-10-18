@@ -6,7 +6,7 @@ namespace projectFamilyTasks.Application.DTOs;
 public class PagedQueryDto
 {
     [Display(Name = "מספר עמוד")]
-    [Range(1, int.MaxValue, ErrorMessage = ValidationMessages.RangeBetween)]
+    [Range(1, ValidationLimits.MaxPageNumber, ErrorMessage = ValidationMessages.RangeBetween)]
     public int Page { get; set; } = 1;
 
     [Display(Name = "גודל עמוד")]
