@@ -22,6 +22,8 @@ public static class ErrorMessages
     public const string ChildPendingApproval = "החשבון ממתין לאישור של אחד ההורים. אפשר להתחבר לאחר האישור.";
     public const string ParentsPasswordWrong = "סיסמת ההורים שגויה.";
     public const string CurrentPasswordWrong = "הסיסמה הנוכחית שגויה.";
+    public const string RecoveryKeyWrong = "מפתח השחזור שגוי או שלא הוגדר.";
+    public const string TooManyAttempts = "יותר מדי ניסיונות. יש לנסות שוב מאוחר יותר.";
     public const string ParentAccessMissing = "הגדרות ההורים טרם אותחלו. יש לפנות למנהל המערכת.";
     public const string UserNotFound = "המשתמש לא נמצא. יש להתחבר מחדש.";
 

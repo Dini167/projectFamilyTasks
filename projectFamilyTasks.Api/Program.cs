@@ -27,6 +27,8 @@ app.UseSwaggerUI();
 
 app.UseCors();
 
+app.UseRateLimiter();
+
 app.UseAuthentication();
 
 app.UseAuthorization();

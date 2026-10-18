@@ -22,9 +22,11 @@ public static class DependencyInjection
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
 
         services.Configure<SeedSettings>(configuration.GetSection(SeedSettings.SectionName));
+        services.Configure<RecoverySettings>(configuration.GetSection(RecoverySettings.SectionName));
         services.AddScoped<DbSeeder>();
 
         services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
+        services.AddSingleton<IRecoveryKeyValidator, RecoveryKeyValidator>();
 
         services.AddSingleton<ITokenService, JwtTokenService>();
 
