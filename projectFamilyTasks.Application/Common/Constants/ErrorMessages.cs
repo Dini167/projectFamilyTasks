@@ -49,7 +49,8 @@ public static class ErrorMessages
     public const string AssignmentNotFound = "המשימה לא נמצאה בסבב הנוכחי.";
     public const string AssignmentTaken = "המשימה כבר נתפסה על ידי אח אחר.";
     public const string TaskNotSuitableForAge = "המשימה אינה מתאימה לגיל הילד.";
-    public const string QuotaReached = "כבר נבחרו כל המשימות שמותר לבחור בסבב הזה.";
+    public const string QuotaReached = "כבר נבחר המספר המרבי של משימות בסבב הזה (עד פי שניים מהמכסה).";
+    public const string ChildrenBelowQuota = "לא ניתן להתחיל את הסבב. ילדים שלא בחרו את המינימום הנדרש:";
     public const string ChildNotApproved = "החשבון של הילד טרם אושר על ידי הורה.";
     public const string NotYourAssignment = "המשימה אינה משויכת לילד המחובר.";
     public const string AlreadyCompleted = "המשימה כבר סומנה כבוצעה בתקופה הנוכחית.";

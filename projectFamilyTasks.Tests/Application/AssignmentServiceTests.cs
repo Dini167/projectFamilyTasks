@@ -96,13 +96,13 @@ public class AssignmentServiceTests
     [Fact]
     public async Task TakeAsync_ChildReachedQuota_ThrowsBadRequestAndDoesNotSave()
     {
-        // Arrange: מכסה של 2, והילדה כבר תפסה 2 (alreadyTaken), והשיבוץ החדש פנוי ומתאים לגילה.
+        // Arrange: מכסה של 2 (מקסימום 4), והילדה כבר תפסה 4 (alreadyTaken), והשיבוץ החדש פנוי ומתאים לגילה.
         var round = OpenRound(quota: 2);
         var child = ChildOf(id: 5, age: 9);
         var assignment = FreeAssignment(id: 10, roundId: round.Id, minAge: 8);
-        GivenChildTakes(round, child, assignment, alreadyTaken: 2);
+        GivenChildTakes(round, child, assignment, alreadyTaken: 4);
 
-        // Act: הניסיון לתפוס משימה שלישית, שאמור להיכשל.
+        // Act: הניסיון לתפוס משימה חמישית, שאמור להיכשל.
         var error = await Assert.ThrowsAsync<BadRequestException>(
             () => _service.TakeAsync(assignment.Id, CancellationToken.None));
 
@@ -186,5 +186,22 @@ public class AssignmentServiceTests
             () => _service.RemoveFromRoundAsync(round.Id, assignment.Id, CancellationToken.None));
         Assert.Equal(ErrorMessages.AssignmentNotFound, error.Message);
         _assignments.Verify(a => a.Remove(It.IsAny<Assignment>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task TakeAsync_ChildAlreadyHasMoreThanTheQuotaButBelowDouble_StillAllowed()
+    {
+        // Arrange: מכסה של 2 (מקסימום 4), והילדה כבר תפסה 3, ולכן עוד אחת מותרת.
+        var round = OpenRound(quota: 2);
+        var child = ChildOf(id: 5, age: 9);
+        var assignment = FreeAssignment(id: 10, roundId: round.Id, minAge: 8);
+        GivenChildTakes(round, child, assignment, alreadyTaken: 3);
+
+        // Act: הילדה תופסת את המשימה הרביעית.
+        await _service.TakeAsync(assignment.Id, CancellationToken.None);
+
+        // Assert: המשימה נרשמה על שמה והשינוי נשמר פעם אחת.
+        Assert.Equal(child.Id, assignment.ChildId);
+        _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 }

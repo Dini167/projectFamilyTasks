@@ -59,6 +59,8 @@ public class RoundService : IRoundService
         var round = await _rounds.GetForUpdateAsync(id, ct) ?? throw new NotFoundException(ErrorMessages.RoundNotFound);
         if (!IsTransitionAllowed(round.Status, request.Status))
             throw new BadRequestException(ErrorMessages.RoundTransitionInvalid);
+        if (round.Status == RoundStatus.OpenForSelection && request.Status == RoundStatus.Active)
+            await EnsureEveryChildReachedMinimumAsync(id, ct);
 
         round.Status = request.Status;
         if (request.Status == RoundStatus.Closed)
@@ -105,6 +107,23 @@ public class RoundService : IRoundService
             CompletionsCount = total?.Count ?? 0,
             PointsEarned = total?.Points ?? 0
         };
+    }
+
+    private async Task EnsureEveryChildReachedMinimumAsync(int roundId, CancellationToken ct)
+    {
+        var round = await _rounds.GetSummaryAsync(roundId, ct)
+                    ?? throw new NotFoundException(ErrorMessages.RoundNotFound);
+        var children = await _members.GetApprovedChildrenAsync(ct);
+
+        var lacking = children
+            .Select(child => (child.Name, Taken: round.Assignments.Count(a => a.ChildId == child.Id),
+                Required: RoundRules.RequiredTasks(round, child)))
+            .Where(entry => entry.Taken < entry.Required)
+            .Select(entry => $"{entry.Name} ({entry.Taken} מתוך {entry.Required})")
+            .ToList();
+
+        if (lacking.Count > 0)
+            throw new BadRequestException($"{ErrorMessages.ChildrenBelowQuota} {string.Join(", ", lacking)}.");
     }
 
     private static bool IsTransitionAllowed(RoundStatus from, RoundStatus to)
