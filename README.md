@@ -18,3 +18,31 @@
 לשגיאת **409 Conflict** עם הודעה בעברית (המשימה כבר נתפסה), והאתר מציג אותה לילד ומרענן את רשימת המשימות הפנויות.
 כך אין צורך בנעילות, ושני ילדים לעולם לא מקבלים את אותה משימה. בדיקת היחידה `AssignmentConcurrencyTests` מדמה את
 המצב עם שני `DbContext` ומוכיחה שהשני נכשל.
+
+## הוראות הרצה
+
+**דרישות:** .NET 8 SDK, ו-Docker עבור PostgreSQL 16.
+
+1. הרצת בסיס הנתונים (קונטיינר בשם `pg`, בפורט 5432):
+
+   ```
+   docker run --name pg -e POSTGRES_PASSWORD=<סיסמה> -p 5432:5432 -d postgres:16
+   ```
+
+2. שמירת הסודות ב-User Secrets (לא נשמרים ב-git). המפתח צריך להיות באורך 32 תווים לפחות:
+
+   ```
+   dotnet user-secrets set "ConnectionStrings:Default" "Host=localhost;Port=5432;Database=familytasks;Username=postgres;Password=<סיסמה>" --project projectFamilyTasks.Api
+   dotnet user-secrets set "JwtSettings:Key" "<מפתח-אקראי-באורך-32-תווים-לפחות>" --project projectFamilyTasks.Api
+   ```
+
+3. הפעלת השרת:
+
+   ```
+   dotnet run --project projectFamilyTasks.Api --launch-profile http
+   ```
+
+   בעליית השרת ה-migrations מוחלים והנתונים ההתחלתיים נוצרים אוטומטית. Swagger נפתח בכתובת
+   `http://localhost:5231/swagger`.
+
+4. הרצת הבדיקות: `dotnet test projectFamilyTasks.slnx`
