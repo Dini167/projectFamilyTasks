@@ -12,10 +12,12 @@ namespace projectFamilyTasks.Api.Controllers;
 public class RoundsController : BaseApiController
 {
     private readonly IRoundService _rounds;
+    private readonly IAssignmentService _assignments;
 
-    public RoundsController(IRoundService rounds)
+    public RoundsController(IRoundService rounds, IAssignmentService assignments)
     {
         _rounds = rounds;
+        _assignments = assignments;
     }
 
     /// <summary>פתיחת סבב חדש עם מכסת משימות לכל ילד. להורים בלבד.</summary>
@@ -38,6 +40,19 @@ public class RoundsController : BaseApiController
         [FromRoute] int id, [FromBody] UpdateRoundRequestDto request, CancellationToken ct)
     {
         await _rounds.UpdateAsync(id, request, ct);
+        return NoContent();
+    }
+
+    /// <summary>הסרת משימה פנויה מהסבב הנוכחי בלבד (המשימה עצמה נשארת). להורים בלבד.</summary>
+    [Authorize(Roles = Roles.Parent)]
+    [HttpDelete("{roundId:int}/assignments/{assignmentId:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponseDto), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> RemoveAssignment(
+        [FromRoute] int roundId, [FromRoute] int assignmentId, CancellationToken ct)
+    {
+        await _assignments.RemoveFromRoundAsync(roundId, assignmentId, ct);
         return NoContent();
     }
 

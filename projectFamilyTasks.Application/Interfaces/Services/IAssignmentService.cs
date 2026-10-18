@@ -12,4 +12,5 @@ public interface IAssignmentService
     Task TakeAsync(int assignmentId, CancellationToken ct);
 
     Task AssignToChildAsync(int assignmentId, int childId, CancellationToken ct);
+    Task RemoveFromRoundAsync(int roundId, int assignmentId, CancellationToken ct);
 }
