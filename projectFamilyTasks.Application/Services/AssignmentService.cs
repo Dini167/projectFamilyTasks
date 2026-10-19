@@ -133,12 +133,7 @@ public class AssignmentService : IAssignmentService
         var now = DateTime.UtcNow;
         var ids = items.Select(i => i.Id).ToList();
         var stamps = await _completions.GetSinceAsync(ids, LocalTime.StartOfWeekUtc(now), ct);
-        foreach (var item in items)
-        {
-            var (limit, since) = FrequencyRules.GetPeriod(item.Frequency, now);
-            item.PeriodLimit = limit;
-            item.CompletionsInPeriod = stamps.Count(s => s.AssignmentId == item.Id && s.CompletedAt >= since);
-        }
+        CompletionProgress.Apply(items, stamps, now);
     }
 
     private async Task<Child> GetCurrentChildAsync(CancellationToken ct)
