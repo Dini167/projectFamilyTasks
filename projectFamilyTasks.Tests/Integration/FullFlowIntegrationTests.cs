@@ -34,6 +34,12 @@ public class FullFlowIntegrationTests : IClassFixture<ApiFactory>
         var profile = await child.GetAsync("/api/children/me");
         await profile.AssertStatusAsync(HttpStatusCode.OK);
         Assert.Equal(pointsEarned, (await profile.ReadJsonAsync()).GetProperty("pointsBalance").GetInt32());
+
+        var summary = await parent.GetAsync($"/api/rounds/{roundId}/summary");
+        await summary.AssertStatusAsync(HttpStatusCode.OK);
+        var kid = (await summary.ReadJsonAsync()).GetProperty("children").EnumerateArray().Single();
+        Assert.Equal(1, kid.GetProperty("assignments")[0].GetProperty("completionsInPeriod").GetInt32());
+        Assert.Equal(1, kid.GetProperty("completionsByDay").EnumerateArray().Sum(day => day.GetInt32()));
     }
 
     private async Task RegisterAndApproveChildAsync(HttpClient parent)

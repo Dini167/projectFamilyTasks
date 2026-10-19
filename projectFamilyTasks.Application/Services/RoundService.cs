@@ -88,7 +88,10 @@ public class RoundService : IRoundService
         var totals = (await _completions.GetTotalsByRoundAsync(id, ct)).ToDictionary(total => total.ChildId);
 
         var summary = _mapper.Map<RoundSummaryDto>(round);
-        summary.Children = children.Select(child => BuildChildSummary(child, round, totals)).ToList();
+        var now = DateTime.UtcNow;
+        var assignmentIds = round.Assignments.Select(a => a.Id).ToList();
+        var stamps = await _completions.GetSinceAsync(assignmentIds, LocalTime.StartOfWeekUtc(now), ct);
+        summary.Children = children.Select(child => BuildChildSummary(child, round, totals, stamps, now)).ToList();
         summary.UnassignedTasks = _mapper.Map<List<AssignmentResponseDto>>(
             round.Assignments.Where(a => a.ChildId is null));
 
@@ -96,16 +99,23 @@ public class RoundService : IRoundService
     }
 
     private ChildSummaryDto BuildChildSummary(
-        Child child, Round round, IReadOnlyDictionary<int, ChildCompletionTotal> totals)
+        Child child, Round round, IReadOnlyDictionary<int, ChildCompletionTotal> totals,
+        IReadOnlyList<CompletionStamp> stamps, DateTime utcNow)
     {
         totals.TryGetValue(child.Id, out var total);
+        var mine = round.Assignments.Where(a => a.ChildId == child.Id).ToList();
+        var myIds = mine.Select(a => a.Id).ToHashSet();
+        var myStamps = stamps.Where(s => myIds.Contains(s.AssignmentId)).ToList();
+        var assignments = _mapper.Map<List<AssignmentResponseDto>>(mine);
+        CompletionProgress.Apply(assignments, myStamps, utcNow);
 
         return new ChildSummaryDto
         {
             ChildId = child.Id,
             ChildName = child.Name,
-            Assignments = _mapper.Map<List<AssignmentResponseDto>>(round.Assignments.Where(a => a.ChildId == child.Id)),
+            Assignments = assignments,
             CompletionsCount = total?.Count ?? 0,
+            CompletionsByDay = CompletionProgress.CountByDayOfWeek(myStamps),
             PointsEarned = total?.Points ?? 0
         };
     }

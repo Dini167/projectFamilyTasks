@@ -17,6 +17,11 @@ public static class LocalTime
         return TimeZoneInfo.ConvertTimeToUtc(sunday, Israel);
     }
 
+    public static int DayOfWeek(DateTime utc)
+    {
+        return (int)TimeZoneInfo.ConvertTimeFromUtc(utc, Israel).DayOfWeek;
+    }
+
     private static TimeZoneInfo FindIsraelZone()
     {
         foreach (var id in new[] { "Asia/Jerusalem", "Israel Standard Time" })
